@@ -4,6 +4,7 @@ import { ContactCards, CreateTag } from "./features";
 import { TContact } from "./types/contact";
 
 let id = 1;
+const dummyExistingTags = ["home", "school", "work"];
 const dummyContacts: TContact[] = [
   {
     id: (id++).toString(),
@@ -83,7 +84,12 @@ function App() {
           topLeftCorner={<SelectTag />}
           topRightSecond={<CreateTag />}
           topRightCorner={<Upload />}
-          mainArea={<ContactCards contacts={dummyContacts} />}
+          mainArea={
+            <ContactCards
+              contacts={dummyContacts}
+              existingTags={dummyExistingTags}
+            />
+          }
         />
       </div>
     </div>

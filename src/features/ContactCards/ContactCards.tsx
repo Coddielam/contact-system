@@ -1,8 +1,27 @@
-import ContactCard from "../../components/ContactCard/ContactCard";
 import type { TContact } from "../../types/contact";
 import { useModal } from "../../hooks";
+import { ContactForm, ContactCard } from "../../components";
 
-export default function ContactCards({ contacts }: { contacts: TContact[] }) {
+const dummyContact = {
+  id: "1",
+  firstName: "eddie",
+  lastName: "lAm",
+  phones: [12341234, 12341234],
+  addresses: ["123 Eddie St."],
+  emails: ["123@email.com", "123@email.com"],
+  orgName: "Topo",
+  websiteUrl: "eddie.com",
+  notes: "Met at work",
+  tags: ["home"],
+};
+
+export default function ContactCards({
+  contacts,
+  existingTags,
+}: {
+  contacts: TContact[];
+  existingTags: string[];
+}) {
   const { showModal, setShowModal, Modal } = useModal();
 
   return (
@@ -15,10 +34,9 @@ export default function ContactCards({ contacts }: { contacts: TContact[] }) {
           onClick={() => setShowModal(true)}
         />
       ))}
-      <Modal
-        showModal={showModal}
-        onCloseBtnClick={() => setShowModal(false)}
-      />
+      <Modal showModal={showModal} onCloseBtnClick={() => setShowModal(false)}>
+        <ContactForm contact={dummyContact} existingTags={existingTags} />
+      </Modal>
     </div>
   );
 }
