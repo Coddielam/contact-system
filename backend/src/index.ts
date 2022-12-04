@@ -10,7 +10,6 @@ app.use(express.json());
 
 (async function connectMongo() {
   try {
-    // there's no auth in the contacts-system db
     await mongoose.connect(`mongodb://localhost:27017/`, {
       dbName: "contacts-system",
       user: "root",
