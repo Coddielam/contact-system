@@ -7,7 +7,17 @@ const dummyContact = {
   firstName: "eddie",
   lastName: "lAm",
   phones: [12341234, 12341234],
-  addresses: ["123 Eddie St."],
+  addresses: [
+    {
+      line1: "",
+      line2: "",
+      line3: "",
+      city: "",
+      state: "",
+      postal: "",
+      country: "",
+    },
+  ],
   emails: ["123@email.com", "123@email.com"],
   orgName: "Topo",
   websiteUrl: "eddie.com",
@@ -35,7 +45,13 @@ export default function ContactCards({
         />
       ))}
       <Modal showModal={showModal} onCloseBtnClick={() => setShowModal(false)}>
-        <ContactForm contact={dummyContact} existingTags={existingTags} />
+        <ContactForm
+          contact={dummyContact}
+          existingTags={existingTags}
+          onSubmitSuccess={() => {
+            window.location.reload();
+          }}
+        />
       </Modal>
     </div>
   );

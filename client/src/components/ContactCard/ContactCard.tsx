@@ -2,6 +2,7 @@ import React from "react";
 import type { TContact } from "../../types/contact";
 import { getFullName } from "../../utils/formatContact";
 import SingleOrMultipleField from "./components/SingleOrMultipleField/SingleOrMultipleField";
+import { useGetContacts } from "../../utils/api/useGetContactCards";
 
 export default function ContactCard({
   contact: {
@@ -21,6 +22,9 @@ export default function ContactCard({
   contact: TContact;
   onClick: () => void;
 }) {
+  const { data, loading, err, refetch } = useGetContacts();
+  console.log("contacts:", data);
+
   return (
     <div
       className="p-4 bg-slate-50 rounded-md px-12 py-6 flex flex-col shadow-md cursor-pointer hover:scale-105 transition-transform"
@@ -31,7 +35,9 @@ export default function ContactCard({
       </p>
       <p className="font-bold mb-6">{orgName}</p>
       <div className="text-sm grid gap-2">
-        <SingleOrMultipleField data={addresses} />
+        <SingleOrMultipleField
+          data={addresses.map((address) => Object.values(address).join())}
+        />
         <SingleOrMultipleField data={emails} />
         <SingleOrMultipleField data={phones} prefix="T:" />
       </div>

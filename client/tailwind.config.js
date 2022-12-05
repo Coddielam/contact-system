@@ -10,6 +10,7 @@ module.exports = {
     extend: {
       colors: {
         appbackground: "#E2E8F0",
+        error: "#D30000",
       },
     },
   },

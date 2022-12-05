@@ -3,10 +3,9 @@ import apiContacts from "./routes/contacts.routes";
 import apiTags from "./routes/tags.routes";
 import mongoose from "mongoose";
 import errorHandler from "./middlewares/error";
+import cors from "cors";
 
 const app = express();
-
-app.use(express.json());
 
 (async function connectMongo() {
   try {
@@ -21,7 +20,8 @@ app.use(express.json());
   }
 })();
 
-// mount routes
+app.use(cors());
+app.use(express.json());
 // /api/contacts
 apiContacts(app);
 // /api/tags
@@ -33,3 +33,14 @@ const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`>>> backend listening on http://localhost:${PORT}`);
 });
+
+// import fs from "fs";
+// import path from "path";
+// import { MyVCard } from "./lib/MyVCard";
+
+// const vcardsPath = path.join(__dirname, "./lib/vcards.vcf");
+// const result = new MyVCard().parseToObject(
+//   fs.readFileSync(vcardsPath).toString().replace(/\r?\n/g, "\r\n")
+// );
+
+// console.log(result);

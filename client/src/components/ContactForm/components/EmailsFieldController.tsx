@@ -5,9 +5,12 @@ import {
   UseFormRegister,
   UseFormSetValue,
   UseFormGetValues,
+  FormState,
+  UseFormClearErrors,
 } from "react-hook-form";
 import { AiFillCloseCircle, AiOutlinePlus } from "react-icons/ai";
 import { TContactForm } from "../types/contactForm";
+import { emailRegex } from "../../../utils/regex";
 
 export default function PhonesFieldController({
   control,
@@ -15,12 +18,16 @@ export default function PhonesFieldController({
   getValues,
   setValue,
   defaultValue,
+  formState,
+  clearErrors,
 }: {
   control: Control<TContactForm>;
   register: UseFormRegister<TContactForm>;
   getValues: UseFormGetValues<TContactForm>;
   setValue: UseFormSetValue<TContactForm>;
   defaultValue: string[];
+  formState: FormState<TContactForm>;
+  clearErrors: UseFormClearErrors<TContactForm>;
 }) {
   const [additionalEmailFieldsCount, setAdditionalEmailFieldsCount] =
     useState(0);
@@ -47,13 +54,14 @@ export default function PhonesFieldController({
                       className="col-span-11"
                       {...register(`emails.${index}`, {
                         value: phone,
+                        pattern: emailRegex,
                       })}
                     />
                     {index > 0 && (
                       <AiFillCloseCircle
                         role="button"
                         className="h-4 w-4 fill-red-500 ml-auto col-span-1"
-                        onClick={() =>
+                        onClick={() => {
                           setValue(
                             `emails`,
                             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -61,10 +69,16 @@ export default function PhonesFieldController({
                             getValues("emails").filter(
                               (phone, i) => index !== i
                             )
-                          )
-                        }
+                          );
+                        }}
                       />
                     )}
+                    {formState.errors.emails &&
+                      formState.errors.emails[index] && (
+                        <p className="text-error col-span-12">
+                          Invalid email format
+                        </p>
+                      )}
                   </div>
                 );
               })}
@@ -81,29 +95,39 @@ export default function PhonesFieldController({
           >
             <input
               className="col-span-11"
-              {...register(`additionalPhones.${index}`, {})}
+              {...register(`additionalEmails.${index}`, {
+                pattern: emailRegex,
+              })}
             />
             <AiFillCloseCircle
               role="button"
               className="h-4 w-4 fill-red-500 ml-auto col-span-1"
-              onClick={() =>
+              onClick={() => {
+                setAdditionalEmailFieldsCount((state) => state - 1);
                 setValue(
-                  `additionalPhones`,
+                  `additionalEmails`,
                   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                   /* @ts-ignore */
-                  getValues("additionalPhones").filter(
+                  getValues("additionalEmails").filter(
                     (phone, i) => index !== i
                   )
-                )
-              }
+                );
+              }}
             />
+            {formState.errors.additionalEmails &&
+              formState.errors.additionalEmails[index] && (
+                <p className="text-error col-span-12">Invalid email format</p>
+              )}
           </div>
         );
       })}
       <div className="bg-slate-300 px-3 py-1 w-fit rounded-md shadow-sm text-xs">
         <AiOutlinePlus
           role="button"
-          onClick={() => setAdditionalEmailFieldsCount((state) => state + 1)}
+          onClick={() => {
+            clearErrors("emails");
+            setAdditionalEmailFieldsCount((state) => state + 1);
+          }}
         />
       </div>
     </div>

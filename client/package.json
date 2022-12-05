@@ -2,6 +2,7 @@
   "name": "contact-manager",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:3000",
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
@@ -11,6 +12,7 @@
     "@types/react": "^18.0.25",
     "@types/react-dom": "^18.0.9",
     "autoprefixer": "^10.4.13",
+    "axios": "^1.2.0",
     "classnames": "^2.3.2",
     "postcss": "^8.4.19",
     "postcss-cli": "^9.1.0",

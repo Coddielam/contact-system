@@ -1,5 +1,7 @@
 import { RequestHandler } from "express";
 import { Document } from "mongoose";
+import { CustomError } from "../error";
+import { MyVCard } from "../lib/MyVCard";
 import { ContactModel } from "../models";
 import { TContactReqBody } from "../types/contact";
 
@@ -23,7 +25,8 @@ export const findAllContacts: RequestHandler<
   {}
 > = async (req, res, next) => {
   try {
-    const contacts = await ContactModel.find();
+    ContactModel.find;
+    const contacts = await ContactModel.find({});
     res.status(200).json({ contacts });
   } catch (error) {
     next(error);
@@ -74,6 +77,23 @@ export const deleteContact: RequestHandler<
     const deletedContact = await ContactModel.findByIdAndDelete(req.params.id);
     if (!deletedContact) throw new Error("Contact does not exist");
     res.status(200).json({ contact: deletedContact });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const uploadContact: RequestHandler<{}, {}, {}> = async () => {};
+
+export const downloadContact: RequestHandler<
+  {},
+  {},
+  { contactId: string }
+> = async (req, res, next) => {
+  try {
+    const contact = await ContactModel.findById(req.body.contactId);
+    if (!contact) throw new CustomError("Contact not found", 400);
+    const filePath = await new MyVCard().createVCFFromDbObj(contact);
+    res.status(200).sendFile(filePath);
   } catch (error) {
     next(error);
   }

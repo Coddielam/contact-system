@@ -5,9 +5,12 @@ import {
   UseFormRegister,
   UseFormSetValue,
   UseFormGetValues,
+  FormState,
+  UseFormClearErrors,
 } from "react-hook-form";
 import { AiFillCloseCircle, AiOutlinePlus } from "react-icons/ai";
 import type { TContactForm } from "../types/contactForm";
+import { phoneRegex } from "../../../utils/regex";
 
 export default function PhonesFieldController({
   control,
@@ -15,12 +18,16 @@ export default function PhonesFieldController({
   getValues,
   setValue,
   defaultValue,
+  formState,
+  clearErrors,
 }: {
   control: Control<TContactForm>;
   register: UseFormRegister<TContactForm>;
   getValues: UseFormGetValues<TContactForm>;
   setValue: UseFormSetValue<TContactForm>;
   defaultValue: number[];
+  formState: FormState<TContactForm>;
+  clearErrors: UseFormClearErrors<TContactForm>;
 }) {
   const [additionalPhoneFieldsCount, setAdditionalPhoneFieldsCount] =
     useState(0);
@@ -31,7 +38,7 @@ export default function PhonesFieldController({
         name="phones"
         control={control}
         defaultValue={defaultValue}
-        render={({ field }) => {
+        render={({ field, formState }) => {
           const { value } = field;
           return (
             <>
@@ -47,13 +54,21 @@ export default function PhonesFieldController({
                       {...register(`phones.${index}`, {
                         value: phone,
                         valueAsNumber: true,
+                        pattern: phoneRegex,
                       })}
                     />
+                    {formState.errors.phones &&
+                      formState.errors.phones[index] && (
+                        <p className="text-error col-span-12">
+                          Phone number must be 8 numbers long without space
+                        </p>
+                      )}
                     {index > 0 && (
                       <AiFillCloseCircle
                         role="button"
                         className="h-4 w-4 fill-red-500 ml-auto col-span-1"
-                        onClick={() =>
+                        onClick={() => {
+                          setAdditionalPhoneFieldsCount((state) => state - 1);
                           setValue(
                             `phones`,
                             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -61,8 +76,8 @@ export default function PhonesFieldController({
                             getValues("phones").filter(
                               (phone, i) => index !== i
                             )
-                          )
-                        }
+                          );
+                        }}
                       />
                     )}
                   </div>
@@ -81,12 +96,15 @@ export default function PhonesFieldController({
             <span className="col-span-2 font-light">+852</span>
             <input
               className="col-span-9"
-              {...register(`additionalPhones.${index}`, {})}
+              {...register(`additionalPhones.${index}`, {
+                pattern: phoneRegex,
+              })}
             />
             <AiFillCloseCircle
               role="button"
               className="h-4 w-4 fill-red-500 ml-auto col-span-1"
-              onClick={() =>
+              onClick={() => {
+                setAdditionalPhoneFieldsCount((state) => state - 1);
                 setValue(
                   `additionalPhones`,
                   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -94,16 +112,25 @@ export default function PhonesFieldController({
                   getValues("additionalPhones").filter(
                     (phone, i) => index !== i
                   )
-                )
-              }
+                );
+              }}
             />
+            {formState.errors.additionalPhones &&
+              formState.errors.additionalPhones[index] && (
+                <p className="text-error col-span-12">
+                  Phone number must be 8 numbers long without space
+                </p>
+              )}
           </div>
         );
       })}
       <div className="bg-slate-300 px-3 py-1 w-fit rounded-md shadow-sm text-xs">
         <AiOutlinePlus
           role="button"
-          onClick={() => setAdditionalPhoneFieldsCount((state) => state + 1)}
+          onClick={() => {
+            clearErrors("phones");
+            setAdditionalPhoneFieldsCount((state) => state + 1);
+          }}
         />
       </div>
     </div>
