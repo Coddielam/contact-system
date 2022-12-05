@@ -1,9 +1,7 @@
-import { usePostContact } from "../../utils/api/useCreateContact";
 import useModal from "../../hooks/useModal";
 import { ContactForm } from "../../components";
 
 export default function CreateContact() {
-  const { data, loading, err, refetch } = usePostContact();
   const { showModal, setShowModal, Modal } = useModal();
 
   return (
@@ -23,7 +21,7 @@ export default function CreateContact() {
         <ContactForm
           existingTags={[]}
           onSubmitSuccess={() => {
-            // window.location.reload();
+            window.location.reload();
           }}
         />
       </Modal>
