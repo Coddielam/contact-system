@@ -9,13 +9,13 @@ import Addresses from "./components/Addresses";
 
 import { TContactForm } from "./types/contactForm";
 import { usePostContact } from "../../utils/api/useCreateContact";
+import { usePatchUpdateContact } from "../../utils/api/useUpdateContact";
 import { useGetTag } from "../../utils/api/useGetTags";
 
 import { TContactReqBody } from "../../utils/api/types/contacts";
 import { AiOutlineLoading } from "react-icons/ai";
 
-const emptyContact: TContact = {
-  id: Date.now().toString(),
+const emptyContact: Omit<TContact, "_id"> = {
   firstName: "",
   lastName: "",
   phones: [],
@@ -32,7 +32,7 @@ export default function ContactForm({
   existingTags,
   onSubmitSuccess,
 }: {
-  contact?: TContact;
+  contact?: TContact | Omit<TContact, "_id">;
   existingTags: string[];
   onSubmitSuccess: () => void;
 }) {
@@ -62,6 +62,13 @@ export default function ContactForm({
     err,
     refetch: postContact,
   } = usePostContact();
+
+  const {
+    data: patchContactData,
+    loading: patchUserLoading,
+    err: patchContactErr,
+    refetch: patchContact,
+  } = usePatchUpdateContact(contact._id);
 
   const {
     data: tags,
@@ -105,15 +112,15 @@ export default function ContactForm({
     const requestBody: TContactReqBody = {
       firstName: data.firstName,
       lastName: data.lastName,
-      phones: concatedPhones.map((phone) => Number(phone)),
+      phones: concatedPhones.map((phone) => Number(phone)).filter((e) => e),
       addresses: data.addresses.concat(data.additionalAddresses),
-      emails: concatedEmails,
+      emails: concatedEmails.filter((e) => e),
       orgName: data.orgName,
       websiteUrl: data.websiteUrl,
       notes: data.notes,
       tags: data.tags,
     };
-    await postContact(requestBody);
+    await (contact._id ? patchContact : postContact)(requestBody);
     const successTimeout = setTimeout(() => {
       onSubmitSuccess();
       clearTimeout(successTimeout);

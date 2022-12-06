@@ -12,7 +12,7 @@ export type TAddress = {
 export type TAddresses = TAddress[];
 
 export type TContact = {
-  id: string;
+  _id: string;
   firstName: string;
   lastName: string;
   phones: TPhones;

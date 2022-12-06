@@ -5,9 +5,12 @@ import {
   createContact,
   updateContact,
   deleteContact,
+  uploadContact,
   downloadContact,
 } from "../controllers/contacts.controller";
 import checkParamId from "../middlewares/checkParamId";
+import multer from "multer";
+import path from "path";
 
 export default function (app: Express) {
   const contactsRouter = express.Router();
@@ -22,13 +25,26 @@ export default function (app: Express) {
   contactsRouter.get("/:id", checkParamId, findContact);
 
   // update a contact
-  contactsRouter.patch("/:id/update", checkParamId, updateContact);
+  contactsRouter.patch(
+    "/:id/update",
+    checkParamId,
+    // accept max of 5 vcards per requests
+    updateContact
+  );
   // delete one or more contacts
   contactsRouter.delete("/:id/delete", checkParamId, deleteContact);
 
-  // TODO: add controllers
   // upload one or more of vcf
-  contactsRouter.post("/upload");
+  const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, "public/upload/vcards");
+    },
+    filename: function (req, file, cb) {
+      cb(null, Date.now() + path.extname(file.originalname));
+    },
+  });
+  const upload = multer({ storage });
+  contactsRouter.post("/upload", upload.array("contacts", 5), uploadContact);
   // download one or more contacts
   contactsRouter.get("/download", downloadContact);
 

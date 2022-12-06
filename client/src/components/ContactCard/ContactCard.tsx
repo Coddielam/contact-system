@@ -27,14 +27,14 @@ export default function ContactCard({
 
   return (
     <div
-      className="p-4 bg-slate-50 rounded-md px-12 py-6 flex flex-col shadow-md cursor-pointer hover:scale-105 transition-transform"
+      className="p-4 bg-slate-50 rounded-md px-12 py-6 flex flex-col shadow-md cursor-pointer hover:scale-105 transition-transform overflow-hidden"
       onClick={onClick}
     >
       <p className="text-4xl font-thin mb-2">
         {getFullName(firstName, lastName)}
       </p>
       <p className="font-bold mb-6">{orgName}</p>
-      <div className="text-sm grid gap-2">
+      <div className="text-sm grid gap-2 break-all">
         <SingleOrMultipleField
           data={addresses.map((address) => Object.values(address).join())}
         />

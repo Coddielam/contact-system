@@ -8,5 +8,5 @@ export const validateUrl = (string: string | number): boolean => {
     return false;
   }
 
-  return url.protocol === "http" || url.protocol === "https";
+  return url.protocol === "http:" || url.protocol === "https:";
 };

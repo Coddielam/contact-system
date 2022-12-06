@@ -5,6 +5,8 @@ import { MyVCard } from "../lib/MyVCard";
 import { ContactModel } from "../models";
 import { TContactReqBody } from "../types/contact";
 
+import fs from "fs";
+
 export const findContact: RequestHandler<
   { id: string },
   { contact: Document },
@@ -82,7 +84,57 @@ export const deleteContact: RequestHandler<
   }
 };
 
-export const uploadContact: RequestHandler<{}, {}, {}> = async () => {};
+export const uploadContact: RequestHandler<{}, {}, {}> = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    if (!req.files?.length) throw new CustomError("No uploaded files", 400);
+
+    const savedContacts = [];
+    for (let i = 0; i < req.files!.length; i++) {
+      const fileInfo = (req.files as Express.Multer.File[])[i];
+      const content = fs.readFileSync(fileInfo.path).toString();
+      const contactObjs = new MyVCard().parseToObject(content);
+
+      const stripeNumber = (string: string) => {
+        return Number(string.replace(/\D/g, ""));
+      };
+
+      // TODO: implement add, skip, update business logic
+      /**
+       * How to determine if the contact exists?
+       * - skip: if the EXACT same contact exists in db
+       * - update: if name + phone found
+       * - add: if ! name + phone found
+       * */
+
+      for (let i = 0; i < contactObjs.length; i++) {
+        const newContact = new ContactModel({
+          firstName: contactObjs[i].name.name,
+          lastName: contactObjs[i].name.surname,
+          phones: contactObjs[i].phones.map((phoneStr) =>
+            stripeNumber(phoneStr)
+          ),
+          addresses: contactObjs[i].adresses,
+          emails: contactObjs[i].emails,
+          orgName: contactObjs[i].org || "",
+          websiteUrl: contactObjs[i].url || "",
+          notes: contactObjs[i].note || "",
+          tag: contactObjs[i]["x-tags"] || [], // either vcf has custom x-tags specified, no tags for by default
+        });
+
+        const savedContact = await newContact.save();
+        savedContacts.push(savedContact);
+      }
+    }
+
+    res.status(200).json({ uploadedContacts: savedContacts });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const downloadContact: RequestHandler<
   {},

@@ -1,6 +1,7 @@
 import fs from "fs";
-import path from "path/posix";
+import path from "path";
 import VCard from "vcf";
+import { CustomError } from "../error";
 import { TContact } from "../models/contact.model";
 
 type TVCardData = {
@@ -42,7 +43,23 @@ export class MyVCard extends VCard {
   }
 
   public parseToObject(string: string): TRenamedVCard[] {
-    const rawVCardsArr = VCard.parse(string);
+    let rawVCardsArr: VCard[] = [];
+    try {
+      rawVCardsArr = VCard.parse(string);
+    } catch (error) {
+      console.error(error);
+    }
+
+    if (!rawVCardsArr.length) {
+      try {
+        rawVCardsArr = VCard.parse(string.replace(/\r?\n/g, "\r\n"));
+      } catch (error) {
+        throw new CustomError("Failed to parse vcf.");
+      }
+    }
+
+    if (!rawVCardsArr.length) throw new CustomError("Failed to parse vcf.");
+
     const objects = rawVCardsArr.map((vcard) => {
       const fieldsArray = vcard.toJSON()[1];
       const defaultVCardData = {
