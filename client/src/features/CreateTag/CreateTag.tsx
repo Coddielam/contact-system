@@ -7,6 +7,7 @@ import {
   TUpdateTagsReqBody,
   usePatchUpdateTags,
 } from "../../utils/api/useUpdateTags";
+import { usePutDeleteTags } from "../../utils/api/useDeleteTags";
 
 export default function Upload() {
   const { showModal, setShowModal, Modal } = useModal();
@@ -55,8 +56,18 @@ export default function Upload() {
       console.error(error);
     }
   };
-  const onDeleteTags: FormEventHandler<HTMLFormElement> = (e) => {
+
+  // handle delete
+  const { refetch: deleteTags, err: deleteTagsErr } = usePutDeleteTags();
+  const onDeleteTags: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const reqData = { tagIds: (formData.getAll("tagId") as string[]) || [] };
+
+    await deleteTags(reqData);
+    if (deleteTagsErr) return;
+    setShowModal(false);
+    window.location.reload();
   };
 
   if (!tagsData) return <>Loading ...</>;
@@ -174,11 +185,19 @@ export default function Upload() {
                         key={tag._id}
                         id={tag._id}
                         type="checkbox"
+                        name="tagId"
                         value={tag._id}
                       />
                     </>
                   );
                 })}
+                <div className="w-full">
+                  <input
+                    type="submit"
+                    value="Delete"
+                    className="bg-red-500 text-slate-100 px-4 py-1 rounded-md shadow-md"
+                  />
+                </div>
               </form>
             </div>
           )}

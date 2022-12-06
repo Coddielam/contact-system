@@ -35,16 +35,17 @@ export const createTag: RequestHandler<
   }
 };
 
-export const deleteTag: RequestHandler<
-  {},
-  { deletedTag: Document },
-  { tagId: string }
-> = async (req, res, next) => {
+export const deleteTag: RequestHandler<{}, {}, { tagIds: string[] }> = async (
+  req,
+  res,
+  next
+) => {
+  const { tagIds } = req.body;
   try {
-    const { tagId } = req.body;
-    const deletedTag = await TagModel.findByIdAndDelete(tagId);
-    if (!deletedTag) throw new Error("Tag did not exist");
-    res.status(200).json({ deletedTag });
+    const result = await TagModel.deleteMany({
+      _id: { $in: tagIds },
+    });
+    res.status(200).json({ result });
   } catch (error) {
     next(error);
   }

@@ -14,7 +14,7 @@ export default function apiTags(app: Express) {
   // create a tag
   contactsRouter.post("/create", createTag);
   // delete a tag
-  contactsRouter.delete("/delete", deleteTag);
+  contactsRouter.put("/delete", deleteTag);
   // update tags
   contactsRouter.patch("/update", updateTags);
 

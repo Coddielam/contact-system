@@ -21,4 +21,7 @@
   textarea {
     @apply px-4 py-2 font-light text-base shadow-sm rounded-sm;
   }
+  input[type="submit"] {
+    @apply cursor-pointer;
+  }
 }
