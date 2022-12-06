@@ -8,18 +8,14 @@ import {
 } from "./features";
 import { useGetContacts } from "./utils/api/useGetContactCards";
 import { useGetTag } from "./utils/api/useGetTags";
+import { TTag } from "./utils/api/useUpdateTags";
 const dummyExistingTags = ["home", "school", "work"];
 
-const SelectTag = () => {
-  const { data } = useGetTag();
-  console.log("tag data:", data);
-
-  if (!data) return <></>;
-
+const SelectTag = ({ tags }: { tags: TTag[] }) => {
   return (
-    <select className="px-2 py-1">
-      <option value="">Select a tag</option>
-      {data.tags.map((tag: { _id: string; name: string }) => {
+    <select className="px-2 py-1 min-w-[130px]">
+      <option value="">--</option>
+      {tags.map((tag: { _id: string; name: string }) => {
         return (
           <option key={tag._id} value={tag.name}>
             {tag.name}
@@ -31,7 +27,7 @@ const SelectTag = () => {
 };
 
 function App() {
-  // useGetContacts
+  const { data: tagsData, loading: tagsLoading, err: tagsErr } = useGetTag();
   const { data, loading, err } = useGetContacts();
 
   if (loading || !data) return <p>Loading ...</p>;
@@ -43,7 +39,15 @@ function App() {
       <div className="max-w-screen-lg mx-auto py-4">
         <DashboardLayout
           topLeftCorner={<SearchContacts />}
-          topLeftSecond={<SelectTag />}
+          topLeftSecond={
+            tagsLoading ? (
+              <>Loading ...</>
+            ) : tagsErr ? (
+              <>x_x</>
+            ) : (
+              <SelectTag tags={tagsData.tags} />
+            )
+          }
           topCenter={<CreateContact />}
           topRightSecond={<CreateTag />}
           topRightCorner={<Upload />}

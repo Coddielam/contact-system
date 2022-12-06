@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { myAxios } from "./myAxios";
 
-type TTag = {
+export type TTag = {
   _id: string;
   name: string;
 };
