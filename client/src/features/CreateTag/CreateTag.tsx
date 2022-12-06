@@ -3,6 +3,10 @@ import { useModal } from "../../hooks";
 import { useCreateTag } from "../../utils/api/useCreateTag";
 import { useGetTag } from "../../utils/api/useGetTags";
 import cn from "classnames";
+import {
+  TUpdateTagsReqBody,
+  usePatchUpdateTags,
+} from "../../utils/api/useUpdateTags";
 
 export default function Upload() {
   const { showModal, setShowModal, Modal } = useModal();
@@ -10,8 +14,8 @@ export default function Upload() {
     "CREATE"
   );
   const { data: tagsData, loading, err, refetch } = useGetTag();
-  const { refetch: postTag, err: createTagErr } = useCreateTag();
   // handle create
+  const { refetch: postTag, err: createTagErr } = useCreateTag();
   const [isCreateInvalid, setIsCreateInvalid] = useState(false);
   const onCreateTag: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
@@ -20,13 +24,36 @@ export default function Upload() {
     if (!formData.get("tag")) {
       setIsCreateInvalid(true);
     }
-    await postTag({ tag: formData.get("tag") as string });
-    if (!createTagErr) {
-      setShowModal(false);
+    try {
+      await postTag({ tag: formData.get("tag") as string });
+      if (!createTagErr) {
+        setShowModal(false);
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error(err);
     }
   };
-  const onUpdateTags: FormEventHandler<HTMLFormElement> = (e) => {
+
+  // handle update
+  const {
+    loading: updateTagsLoading,
+    err: updateTagsError,
+    refetch: patchTags,
+  } = usePatchUpdateTags();
+  const onUpdateTags: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const reqBody: TUpdateTagsReqBody = { tags: [] };
+    for (const [key, value] of formData.entries()) {
+      reqBody.tags.push({ _id: key, name: value as string });
+    }
+    try {
+      await patchTags(reqBody);
+      !updateTagsError && setShowModal(false);
+    } catch (error) {
+      console.error(error);
+    }
   };
   const onDeleteTags: FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
@@ -42,7 +69,13 @@ export default function Upload() {
       >
         Create Tag
       </button>
-      <Modal showModal={showModal} onCloseBtnClick={() => setShowModal(false)}>
+      <Modal
+        showModal={showModal}
+        onCloseBtnClick={() => {
+          setShowModal(false);
+          window.location.reload();
+        }}
+      >
         <div className="w-full flex flex-col gap-5">
           <h1>Create a new tag:</h1>
           {/* actions panel */}
@@ -101,23 +134,42 @@ export default function Upload() {
           {/* UPDATE VIEW */}
           {action === "UPDATE" && (
             <div className="mt-5 border-t-2 border-slate-300 pt-5">
-              <form onSubmit={onUpdateTags}>
+              <form
+                onSubmit={onUpdateTags}
+                className="flex flex-col gap-3 items-start"
+              >
                 {tagsData.tags.map((tag: { _id: string; name: string }) => {
                   return (
-                    <input key={tag._id} type="text" defaultValue={tag.name} />
+                    <input
+                      key={tag._id}
+                      name={tag._id}
+                      type="text"
+                      defaultValue={tag.name}
+                    />
                   );
                 })}
+                <input
+                  type="submit"
+                  value="Update"
+                  className={cn("py-1 px-3 bg-blue-400 rounded-md")}
+                />
+                {updateTagsError && <p className="text-error">Server error</p>}
               </form>
             </div>
           )}
           {/* DELETE VIEW */}
           {action === "DELETE" && (
             <div className="mt-5 border-t-2 border-slate-300 pt-5">
-              <form onSubmit={onDeleteTags}>
+              <form
+                onSubmit={onDeleteTags}
+                className="flex gap-3 flex-wrap items-center"
+              >
                 {tagsData.tags.map((tag: { _id: string; name: string }) => {
                   return (
                     <>
-                      <label htmlFor={tag._id}>{tag.name}</label>
+                      <label className="mt-0" htmlFor={tag._id}>
+                        {tag.name}
+                      </label>
                       <input
                         key={tag._id}
                         id={tag._id}

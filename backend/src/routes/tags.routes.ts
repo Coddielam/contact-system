@@ -3,6 +3,7 @@ import {
   findAllTags,
   createTag,
   deleteTag,
+  updateTags,
 } from "../controllers/tags.controller";
 
 export default function apiTags(app: Express) {
@@ -10,11 +11,12 @@ export default function apiTags(app: Express) {
 
   // get all the tags
   contactsRouter.get("/all", findAllTags);
-
   // create a tag
   contactsRouter.post("/create", createTag);
   // delete a tag
   contactsRouter.delete("/delete", deleteTag);
+  // update tags
+  contactsRouter.patch("/update", updateTags);
 
   app.use("/api/tags", contactsRouter);
 }
