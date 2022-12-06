@@ -1,7 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
 const tagSchema = new mongoose.Schema({
-  _id: mongoose.Types.ObjectId,
   name: String,
   contacts: [
     {

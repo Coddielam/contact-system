@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { MyVCard } from "../lib/MyVCard";
 export type TContact = {
   // _id: Schema.Types.ObjectId;
   firstName: string;
@@ -48,5 +49,33 @@ const contactSchema = new mongoose.Schema<TContact>({
     },
   ],
 });
+
+// methods
+contactSchema.methods.generateVCF = function generateVCF() {
+  const {
+    firstName,
+    lastName,
+    phones,
+    addresses,
+    emails,
+    orgName,
+    websiteUrl,
+    notes,
+    tags,
+  } = this;
+  const obj = {
+    firstName,
+    lastName,
+    phones,
+    addresses,
+    emails,
+    orgName,
+    websiteUrl,
+    notes,
+    tags,
+  };
+  const filePath = new MyVCard().createVCFFromDbObj(obj);
+  return filePath;
+};
 
 export default mongoose.model("Contact", contactSchema);

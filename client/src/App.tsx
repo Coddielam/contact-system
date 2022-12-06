@@ -1,13 +1,31 @@
 import Upload from "./features/Upload/Upoad";
 import DashboardLayout from "./layouts/Dashboard/DashboardLayout";
-import { ContactCards, CreateContact, CreateTag } from "./features";
+import {
+  ContactCards,
+  CreateContact,
+  CreateTag,
+  SearchContacts,
+} from "./features";
 import { useGetContacts } from "./utils/api/useGetContactCards";
+import { useGetTag } from "./utils/api/useGetTags";
 const dummyExistingTags = ["home", "school", "work"];
 
 const SelectTag = () => {
+  const { data } = useGetTag();
+  console.log("tag data:", data);
+
+  if (!data) return <></>;
+
   return (
     <select className="px-2 py-1">
       <option value="">Select a tag</option>
+      {data.tags.map((tag: { _id: string; name: string }) => {
+        return (
+          <option key={tag._id} value={tag.name}>
+            {tag.name}
+          </option>
+        );
+      })}
     </select>
   );
 };
@@ -24,8 +42,9 @@ function App() {
     <div className="bg-appbackground w-screen h-screen">
       <div className="max-w-screen-lg mx-auto py-4">
         <DashboardLayout
-          topLeftCorner={<SelectTag />}
-          topLeftSecond={<CreateContact />}
+          topLeftCorner={<SearchContacts />}
+          topLeftSecond={<SelectTag />}
+          topCenter={<CreateContact />}
           topRightSecond={<CreateTag />}
           topRightCorner={<Upload />}
           mainArea={
