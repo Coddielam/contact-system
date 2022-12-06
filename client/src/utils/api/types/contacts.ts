@@ -1,3 +1,5 @@
+import { TTag } from "./tags";
+
 export type TPhones = number[];
 export type TEmails = string[];
 
@@ -18,7 +20,7 @@ export type TContactReqBody = {
   orgName: string;
   websiteUrl: string;
   notes: string;
-  tags: string[];
+  tags: TTag[];
 } & {
   // arbitrary field
   [key: string]: any;

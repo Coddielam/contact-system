@@ -2,13 +2,14 @@ import type { TContact } from "../../types/contact";
 import { useModal } from "../../hooks";
 import { ContactForm, ContactCard } from "../../components";
 import { useState } from "react";
+import { TTag } from "../../utils/api/types/tags";
 
 export default function ContactCards({
   contacts,
   existingTags,
 }: {
   contacts: TContact[];
-  existingTags: string[];
+  existingTags: TTag[];
 }) {
   const { showModal, setShowModal, Modal } = useModal();
 

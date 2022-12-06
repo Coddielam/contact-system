@@ -14,6 +14,7 @@ import { useGetTag } from "../../utils/api/useGetTags";
 
 import { TContactReqBody } from "../../utils/api/types/contacts";
 import { AiOutlineLoading } from "react-icons/ai";
+import { TTag } from "../../utils/api/types/tags";
 
 const emptyContact: Omit<TContact, "_id"> = {
   firstName: "",
@@ -33,7 +34,7 @@ export default function ContactForm({
   onSubmitSuccess,
 }: {
   contact?: TContact | Omit<TContact, "_id">;
-  existingTags: string[];
+  existingTags: TTag[];
   onSubmitSuccess: () => void;
 }) {
   const {
@@ -120,6 +121,7 @@ export default function ContactForm({
       notes: data.notes,
       tags: data.tags,
     };
+
     await (contact._id ? patchContact : postContact)(requestBody);
     const successTimeout = setTimeout(() => {
       onSubmitSuccess();
@@ -175,23 +177,29 @@ export default function ContactForm({
                   {existingTags.map((tag, index) => {
                     return (
                       <span
-                        key={tag + "-" + index}
+                        key={tag._id}
                         onClick={() =>
                           onChange(
-                            value?.includes(tag)
-                              ? value?.filter((addedTag) => tag !== addedTag)
+                            value?.find((e) => e._id === tag._id)
+                              ? value?.filter(
+                                  (addedTag) => tag._id !== addedTag._id
+                                )
                               : [...value, tag]
                           )
                         }
                         className={cn(
                           "px-3 py-1 w-fit rounded-md shadow-md cursor-pointer",
                           {
-                            "bg-slate-200": !value.includes(tag),
-                            "bg-orange-400 text-slate-100": value.includes(tag),
+                            "bg-slate-200": !value.find(
+                              (e) => e._id === tag._id
+                            ),
+                            "bg-orange-400 text-slate-100": value.find(
+                              (e) => e._id === tag._id
+                            ),
                           }
                         )}
                       >
-                        {tag}
+                        {tag.name}
                       </span>
                     );
                   })}

@@ -13,7 +13,7 @@ export const findContact: RequestHandler<
   {}
 > = async (req, res, next) => {
   try {
-    const contact = await ContactModel.findById(req.params.id);
+    const contact = await ContactModel.findById(req.params.id).populate("tags");
     if (!contact) throw new Error("Contact does not exist");
     res.status(200).json({ contact });
   } catch (error) {
@@ -27,8 +27,7 @@ export const findAllContacts: RequestHandler<
   {}
 > = async (req, res, next) => {
   try {
-    ContactModel.find;
-    const contacts = await ContactModel.find({});
+    const contacts = await ContactModel.find().populate("tags");
     res.status(200).json({ contacts });
   } catch (error) {
     next(error);
@@ -58,10 +57,19 @@ export const updateContact: RequestHandler<
   TContactReqBody
 > = async (req, res, next) => {
   try {
+    const { tags, ...otherFields } = req.body;
+    const update = tags?.length
+      ? {
+          ...otherFields,
+          $push: { tags: { $each: tags } },
+        }
+      : req.body;
+
     const updatedContact = await ContactModel.findByIdAndUpdate(
       req.params.id,
-      req.body
+      update
     );
+
     if (!updatedContact) throw new Error("Contact does not exist");
     res.status(200).json({ contact: updatedContact });
   } catch (error) {

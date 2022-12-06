@@ -1,0 +1,32 @@
+BEGIN:VCARD
+VERSION:4.0
+N:Holt;Cailin;;;
+FN:Cailin Holt
+EMAIL;type=HOME:ac.mattis.semper@incursuset.ca
+TEL;type=HOME:91231234
+TEL;type=WORK:(198) 610-0916
+ADR;type=HOME:Ap #133-3765 Egestas. St.;;;El Cerrito;Vermont;77122;
+NOTE:John Doe has a long and varied history\, being documented on more police files that anyone else. Reports of his death are alas numerous.
+CUSTOM:Hello Custom
+END:VCARD
+BEGIN:VCARD
+VERSION:4.0
+N:Hill;Rowan;;;
+FN:Rowan Hill
+EMAIL;type=HOME:non.massa.non@arcuVestibulum.org
+EMAIL;type=WORK:In@molestietellus.edu
+TEL;type=HOME:(429) 589-0788
+TEL;type=WORK:(533) 412-8792
+ADR;type=HOME:107-6978 Ligula Ave;;;Juneau;Mississippi;58320;
+ADR;type=WORK:107-6978 Ligula Ave;;;Juneau;Mississippi;58320;
+END:VCARD
+BEGIN:VCARD
+VERSION:4.0
+N:Strickland;Jenette;;;
+FN:Jenette Strickland
+EMAIL;type=HOME:Nunc.commodo.auctor@metusvitaevelit.ca
+EMAIL;type=WORK:Sed@quisarcu.edu
+TEL;type=HOME:(864) 881-3539
+TEL;type=WORK:(614) 228-9533
+ADR;type=HOME:293-3774 Nunc Road;;;Independence;Wisconsin;45686;
+END:VCARD

@@ -9,7 +9,6 @@ import {
 import { useGetContacts } from "./utils/api/useGetContactCards";
 import { useGetTag } from "./utils/api/useGetTags";
 import { TTag } from "./utils/api/useUpdateTags";
-const dummyExistingTags = ["home", "school", "work"];
 
 const SelectTag = ({ tags }: { tags: TTag[] }) => {
   return (
@@ -45,17 +44,21 @@ function App() {
             ) : tagsErr ? (
               <>x_x</>
             ) : (
-              <SelectTag tags={tagsData.tags} />
+              <SelectTag tags={tagsData!.tags} />
             )
           }
           topCenter={<CreateContact />}
           topRightSecond={<CreateTag />}
           topRightCorner={<Upload />}
           mainArea={
-            <ContactCards
-              contacts={data.contacts}
-              existingTags={dummyExistingTags}
-            />
+            tagsData ? (
+              <ContactCards
+                contacts={data.contacts}
+                existingTags={tagsData.tags}
+              />
+            ) : (
+              <></>
+            )
           }
         />
       </div>

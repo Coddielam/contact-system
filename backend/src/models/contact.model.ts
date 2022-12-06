@@ -43,9 +43,8 @@ const contactSchema = new mongoose.Schema<TContact>({
   notes: String,
   tags: [
     {
-      type: Schema.Types.Array,
+      type: Schema.Types.ObjectId,
       ref: "Tag",
-      default: [],
     },
   ],
 });

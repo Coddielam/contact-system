@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { myAxios } from "./myAxios";
+import { TTag } from "./types/tags";
 
 const getTags = async () => {
   const res = await myAxios.get("/api/tags/all");
@@ -7,7 +8,7 @@ const getTags = async () => {
 };
 
 export function useGetTag() {
-  const [data, setData] = useState<any>();
+  const [data, setData] = useState<{ tags: TTag[] }>();
   const [err, setErr] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
 

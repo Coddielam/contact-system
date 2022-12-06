@@ -22,8 +22,7 @@ export default function ContactCard({
   contact: TContact;
   onClick: () => void;
 }) {
-  const { data, loading, err, refetch } = useGetContacts();
-  console.log("contacts:", data);
+  console.log("contact:", tags);
 
   return (
     <div
@@ -45,10 +44,10 @@ export default function ContactCard({
         {tags.map((tag) => {
           return (
             <span
-              key={id + tag}
+              key={tag._id}
               className="bg-slate-300 px-2 py-1 text-xs rounded-sm"
             >
-              {tag}
+              {tag.name}
             </span>
           );
         })}

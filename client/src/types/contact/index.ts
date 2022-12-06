@@ -1,3 +1,5 @@
+import { TTag } from "../../utils/api/types/tags";
+
 export type TPhones = number[];
 export type TEmails = string[];
 export type TAddress = {
@@ -21,7 +23,7 @@ export type TContact = {
   orgName: string;
   websiteUrl: string;
   notes: string;
-  tags: string[];
+  tags: TTag[];
 } & {
   // arbitrary field
   [key: string]: any;
