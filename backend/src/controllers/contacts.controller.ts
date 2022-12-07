@@ -6,6 +6,8 @@ import { ContactModel, TagModel } from "../models";
 import { TContactReqBody } from "../types/contact";
 import _ from "lodash";
 import fs from "fs";
+import { TContact } from "../models/contact.model";
+import { stringify } from "querystring";
 
 export const findContact: RequestHandler<
   { id: string },
@@ -100,7 +102,7 @@ export const uploadContact: RequestHandler<{}, {}, {}> = async (
       const fileInfo = (req.files as Express.Multer.File[])[i];
       const content = fs.readFileSync(fileInfo.path).toString();
       const contactObjs = new MyVCard().parseToObject(content);
-
+      // helper function
       const stripeNumber = (string: string) => {
         return Number(string.replace(/\D/g, ""));
       };
@@ -125,75 +127,94 @@ export const uploadContact: RequestHandler<{}, {}, {}> = async (
           customs: contactObjs[i].customs,
         };
         // check if there's one with the same name
-        const contactInDb = await ContactModel.findOne({
+        const contactsInDb = await ContactModel.find({
           firstName: uploadedContact.firstName,
           lastName: uploadedContact.lastName,
         });
 
-        // check if exact same;
-        const isExactSame = !contactInDb
-          ? false
-          : JSON.stringify({
-              firstName: uploadedContact.firstName,
-              lastName: uploadedContact.lastName,
-              phones: _.sortBy(uploadedContact.phones),
-              addresses: _.sortBy(uploadedContact.addresses, ["line1"]),
-              emails: _.sortBy(uploadedContact.emails),
-            }) ===
-            JSON.stringify({
-              firstName: contactInDb.firstName,
-              lastName: contactInDb.lastName,
-              phones: _.sortBy(contactInDb.phones),
-              addresses: _.sortBy(
-                contactInDb.addresses.map(
-                  ({ line1, line2, line3, city, state, postal, country }) => ({
-                    line1,
-                    line2,
-                    line3,
-                    city,
-                    state,
-                    postal,
-                    country,
-                  })
-                ),
-                ["line1"]
+        // helper function
+        const stringifyDbContact = (
+          doc: Document<any, any, TContact> & TContact
+        ) => {
+          return JSON.stringify({
+            firstName: doc.firstName,
+            lastName: doc.lastName,
+            phones: _.sortBy(doc.phones),
+            addresses: _.sortBy(
+              doc.addresses.map(
+                ({ line1, line2, line3, city, state, postal, country }) => ({
+                  line1,
+                  line2,
+                  line3,
+                  city,
+                  state,
+                  postal,
+                  country,
+                })
               ),
-              emails: _.sortBy(contactInDb.emails),
-            });
+              ["line1"]
+            ),
+            emails: _.sortBy(doc.emails),
+          });
+        };
+
+        const stringifiedDbContacts = contactsInDb.map((contact) =>
+          stringifyDbContact(contact)
+        );
+
+        // check if exact same;
+        const hasExactSame = !contactsInDb.length
+          ? undefined
+          : stringifiedDbContacts.find(
+              (contact) =>
+                contact ===
+                JSON.stringify({
+                  firstName: uploadedContact.firstName,
+                  lastName: uploadedContact.lastName,
+                  phones: _.sortBy(uploadedContact.phones),
+                  addresses: _.sortBy(uploadedContact.addresses, ["line1"]),
+                  emails: _.sortBy(uploadedContact.emails),
+                })
+            )
+          ? true
+          : false;
+
+        const contactInDb = hasExactSame;
 
         // check if the one in db shares a same number with the one being uploaded
-        let isUpdateSamePerson: boolean = false;
-        if (contactInDb) {
-          isUpdateSamePerson = contactInDb?.phones.find((p) =>
-            uploadedContact.phones.includes(p)
-          )
-            ? true
-            : false;
+        let updateSamePerson:
+          | (Document<any, any, TContact> & TContact)
+          | undefined;
+        if (contactsInDb.length) {
+          updateSamePerson = contactsInDb.find((contact) =>
+            contact.phones.find((phone) =>
+              uploadedContact.phones.includes(phone)
+            )
+          );
         }
 
-        if (contactInDb && isUpdateSamePerson && !isExactSame) {
-          console.log("uodate:", contactInDb.firstName);
+        if (updateSamePerson && !hasExactSame) {
           const updatedContact = await ContactModel.findByIdAndUpdate(
-            contactInDb._id,
+            updateSamePerson._id,
             uploadedContact
           );
           updatedContacts.push(updatedContact);
           continue;
         }
 
-        if (contactInDb && isExactSame) {
+        if (hasExactSame) {
           skippedContacts.push(contactInDb);
           continue;
         }
 
-        if (!contactInDb || (contactInDb && !isUpdateSamePerson)) {
+        if (!hasExactSame || !updateSamePerson) {
           const newContact = new ContactModel(uploadedContact);
           savingContacts.push(newContact);
         }
       }
     }
 
-    const savedContacts = await ContactModel.bulkSave(savingContacts);
+    await ContactModel.bulkSave(savingContacts);
 
     res.status(200).json({
       savedContacts: savingContacts,

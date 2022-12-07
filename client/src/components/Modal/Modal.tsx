@@ -9,7 +9,7 @@ export default function Modal({
 }: PropsWithChildren<{ showModal: boolean; onCloseBtnClick?: () => void }>) {
   const ModalComponent = () => {
     return (
-      <div className="fixed top-0 left-0 w-screen h-screen bg-slate-700 bg-opacity-40 py-16 overflow-scroll">
+      <div className="fixed top-0 left-0 w-screen h-screen bg-slate-700 bg-opacity-40 py-16 overflow-scroll z-50">
         <div className="bg-slate-50 p-8 pb-16 rounded-md shadow-md w-1/2 min-w-[600px] mx-auto">
           <div>
             <AiFillCloseCircle

@@ -5,6 +5,7 @@ import { SlOptionsVertical } from "react-icons/sl";
 import { useState } from "react";
 import cn from "classnames";
 import { useDownloadContact } from "../../utils/api/useDownloadContact";
+import { useDeleteContact } from "../../utils/api/useDeleteContact";
 
 export default function ContactCard({
   contact: {
@@ -27,11 +28,10 @@ export default function ContactCard({
   const [showTooltip, setShowTooltip] = useState(false);
 
   const { refetch: download, err: downloadErr } = useDownloadContact();
+  const { refetch: deleteContact, err: deleteErr } = useDeleteContact();
 
   const onDownload = async () => {
     const blob = await download(_id);
-    console.log(blob);
-
     const a = document.createElement("a");
     a.classList.add("hidden");
     document.body.appendChild(a);
@@ -45,6 +45,15 @@ export default function ContactCard({
 
     if (!downloadErr) {
       setShowTooltip(false);
+      window.location.reload();
+    }
+  };
+
+  const onDelete = async () => {
+    await deleteContact(_id);
+    if (!deleteErr) {
+      setShowTooltip(false);
+      window.location.reload();
     }
   };
 
@@ -63,12 +72,23 @@ export default function ContactCard({
         <SlOptionsVertical />
         <ul
           className={cn(
-            "absolute right-0 bg-white shadow-lg rounded-md p-2 mt-3 hover:bg-blue-300 transition-all",
+            "absolute right-0 bg-white shadow-lg rounded-md p-2 mt-3",
             { hidden: !showTooltip }
           )}
         >
-          <li className="whitespace-nowrap px-2" onClick={onDownload}>
+          <li
+            role="button"
+            className="whitespace-nowrap px-2 hover:bg-blue-300 transition-all"
+            onClick={onDownload}
+          >
             Download .vcf
+          </li>
+          <li
+            role="button"
+            className="whitespace-nowrap px-2 hover:bg-red-300 transition-all"
+            onClick={onDelete}
+          >
+            Delete
           </li>
         </ul>
       </div>

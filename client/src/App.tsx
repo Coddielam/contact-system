@@ -11,6 +11,8 @@ import { useGetTag } from "./utils/api/useGetTags";
 import { TTag } from "./utils/api/useUpdateTags";
 import { useMemo, useState } from "react";
 import { TContact } from "./types/contact";
+import { AiOutlineLoading } from "react-icons/ai";
+import { TbRobotOff } from "react-icons/tb";
 
 const SelectTag = ({
   tags,
@@ -82,47 +84,44 @@ function App() {
     return returnContacts;
   }, [contacts, selectedTagName, searchableContacts, searchValue]);
 
-  if (loading || !contacts) return <p>Loading ...</p>;
-
-  if (err) return <p>Error!</p>;
-
   return (
-    <div className="bg-appbackground w-screen h-screen">
+    <div className="bg-appbackground w-screen h-screen overflow-scroll">
       <div className="max-w-screen-lg mx-auto py-4">
-        <DashboardLayout
-          topLeftCorner={
-            tagsLoading || !tagsData ? (
-              <>Loading ...</>
-            ) : tagsErr ? (
-              <>x_x</>
-            ) : (
+        {err && (
+          <div className="flex flex-col items-center">
+            <TbRobotOff className="w-48 h-48 block" />
+            <p className="text-4xl font-light">Something went wrong!</p>
+          </div>
+        )}
+        {(loading || !contacts) && (
+          <AiOutlineLoading className="h-28 w-28 animate-spin fill-slate-500" />
+        )}
+        {contacts && tagsData && (
+          <DashboardLayout
+            topLeftCorner={
               <SelectTag
                 tags={tagsData.tags}
                 selectedTagName={selectedTagName}
                 setSelectedTagName={setSelectedTagName}
               />
-            )
-          }
-          topLeftSecond={
-            <SearchContacts
-              value={searchValue}
-              setSearchValue={setSearchValue}
-            />
-          }
-          topCenter={<CreateContact existingTags={tagsData?.tags || []} />}
-          topRightSecond={<CreateTag />}
-          topRightCorner={<Upload />}
-          mainArea={
-            tagsData ? (
+            }
+            topLeftSecond={
+              <SearchContacts
+                value={searchValue}
+                setSearchValue={setSearchValue}
+              />
+            }
+            topCenter={<CreateContact existingTags={tagsData.tags || []} />}
+            topRightSecond={<CreateTag />}
+            topRightCorner={<Upload />}
+            mainArea={
               <ContactCards
                 contacts={filteredContacts}
                 existingTags={tagsData.tags}
               />
-            ) : (
-              <></>
-            )
-          }
-        />
+            }
+          />
+        )}
       </div>
     </div>
   );

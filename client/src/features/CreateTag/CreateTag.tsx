@@ -52,6 +52,7 @@ export default function Upload() {
     try {
       await patchTags(reqBody);
       !updateTagsError && setShowModal(false);
+      window.location.reload();
     } catch (error) {
       console.error(error);
     }
@@ -84,7 +85,6 @@ export default function Upload() {
         showModal={showModal}
         onCloseBtnClick={() => {
           setShowModal(false);
-          window.location.reload();
         }}
       >
         <div className="w-full flex flex-col gap-5">
@@ -145,60 +145,78 @@ export default function Upload() {
           {/* UPDATE VIEW */}
           {action === "UPDATE" && (
             <div className="mt-5 border-t-2 border-slate-300 pt-5">
-              <form
-                onSubmit={onUpdateTags}
-                className="flex flex-col gap-3 items-start"
-              >
-                {tagsData.tags.map((tag: { _id: string; name: string }) => {
-                  return (
-                    <input
-                      key={tag._id}
-                      name={tag._id}
-                      type="text"
-                      defaultValue={tag.name}
-                    />
-                  );
-                })}
-                <input
-                  type="submit"
-                  value="Update"
-                  className={cn("py-1 px-3 bg-blue-400 rounded-md")}
-                />
-                {updateTagsError && <p className="text-error">Server error</p>}
-              </form>
+              {!tagsData.tags.length && (
+                <p className="text-slate-300">No Tags</p>
+              )}
+
+              {!tagsData.tags.length ? (
+                <></>
+              ) : (
+                <form
+                  onSubmit={onUpdateTags}
+                  className="flex flex-col gap-3 items-start"
+                >
+                  {tagsData.tags.map((tag: { _id: string; name: string }) => {
+                    return (
+                      <input
+                        key={tag._id}
+                        name={tag._id}
+                        type="text"
+                        defaultValue={tag.name}
+                      />
+                    );
+                  })}
+                  <input
+                    type="submit"
+                    value="Update"
+                    className={cn("py-1 px-3 bg-blue-400 rounded-md")}
+                  />
+                  {updateTagsError && (
+                    <p className="text-error">Server error</p>
+                  )}
+                </form>
+              )}
             </div>
           )}
           {/* DELETE VIEW */}
           {action === "DELETE" && (
             <div className="mt-5 border-t-2 border-slate-300 pt-5">
-              <form
-                onSubmit={onDeleteTags}
-                className="flex gap-3 flex-wrap items-center"
-              >
-                {tagsData.tags.map((tag: { _id: string; name: string }) => {
-                  return (
-                    <>
-                      <label className="mt-0" htmlFor={tag._id}>
-                        {tag.name}
-                      </label>
-                      <input
-                        key={tag._id}
-                        id={tag._id}
-                        type="checkbox"
-                        name="tagId"
-                        value={tag._id}
-                      />
-                    </>
-                  );
-                })}
-                <div className="w-full">
-                  <input
-                    type="submit"
-                    value="Delete"
-                    className="bg-red-500 text-slate-100 px-4 py-1 rounded-md shadow-md"
-                  />
-                </div>
-              </form>
+              {!tagsData.tags.length && (
+                <p className="text-slate-300">No Tags</p>
+              )}
+
+              {!tagsData.tags.length ? (
+                <></>
+              ) : (
+                <form
+                  onSubmit={onDeleteTags}
+                  className="flex gap-3 flex-wrap items-center"
+                >
+                  {tagsData.tags.map((tag: { _id: string; name: string }) => {
+                    return (
+                      <>
+                        <label className="mt-0" htmlFor={tag._id}>
+                          {tag.name}
+                        </label>
+                        <input
+                          key={tag._id}
+                          id={tag._id}
+                          type="checkbox"
+                          name="tagId"
+                          value={tag._id}
+                        />
+                      </>
+                    );
+                  })}
+                  <div className="w-full">
+                    <input
+                      type="submit"
+                      value="Delete"
+                      className="bg-red-500 text-slate-100 px-4 py-1 rounded-md shadow-md"
+                    />
+                  </div>
+                </form>
+              )}
             </div>
           )}
         </div>

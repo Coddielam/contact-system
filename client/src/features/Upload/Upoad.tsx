@@ -9,7 +9,9 @@ export default function Upload() {
   const onSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    refetch(formData);
+    await refetch(formData);
+    if (!err && data) setShowModal(false);
+    window.location.reload();
   };
 
   return (
