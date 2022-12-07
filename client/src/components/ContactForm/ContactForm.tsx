@@ -153,7 +153,9 @@ export default function ContactForm({
 
   return (
     <>
-      <h1>Update Contact:</h1>
+      <h1 className="text-2xl font-thin">
+        {contact._id ? "Update" : "Create"} Contact:
+      </h1>
       <form
         className="grid grid-cols-12 gap-4"
         onSubmit={handleSubmit(onSubmit)}
