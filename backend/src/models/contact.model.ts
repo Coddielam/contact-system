@@ -18,7 +18,8 @@ export type TContact = {
   orgName: string;
   websiteUrl: string;
   notes: string;
-  tags: [mongoose.Types.ObjectId];
+  tags: mongoose.Types.ObjectId[];
+  customs: { label: string; value: string }[];
 };
 
 const contactSchema = new mongoose.Schema<TContact>({
@@ -47,6 +48,12 @@ const contactSchema = new mongoose.Schema<TContact>({
       ref: "Tag",
     },
   ],
+  customs: [
+    {
+      label: String,
+      value: String,
+    },
+  ],
 });
 
 // methods
@@ -61,6 +68,7 @@ contactSchema.methods.generateVCF = function generateVCF() {
     websiteUrl,
     notes,
     tags,
+    customs,
   } = this;
   const obj = {
     firstName,
@@ -72,6 +80,7 @@ contactSchema.methods.generateVCF = function generateVCF() {
     websiteUrl,
     notes,
     tags,
+    customs,
   };
   const filePath = new MyVCard().createVCFFromDbObj(obj);
   return filePath;

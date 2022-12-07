@@ -2,7 +2,7 @@ import { RequestHandler } from "express";
 import { Document } from "mongoose";
 import { CustomError } from "../error";
 import { MyVCard } from "../lib/MyVCard";
-import { ContactModel } from "../models";
+import { ContactModel, TagModel } from "../models";
 import { TContactReqBody } from "../types/contact";
 
 import fs from "fs";
@@ -41,7 +41,7 @@ export const createContact: RequestHandler<
 > = async (req, res, next) => {
   try {
     // TODO: validate request body
-    const { firstName, lastName, phones, addresses } = req.body;
+
     // validate
     const newContact = new ContactModel(req.body);
     const contact = await newContact.save();
@@ -92,7 +92,7 @@ export const uploadContact: RequestHandler<{}, {}, {}> = async (
   try {
     if (!req.files?.length) throw new CustomError("No uploaded files", 400);
 
-    const savedContacts = [];
+    const savingContacts = [];
     for (let i = 0; i < req.files!.length; i++) {
       const fileInfo = (req.files as Express.Multer.File[])[i];
       const content = fs.readFileSync(fileInfo.path).toString();
@@ -111,6 +111,10 @@ export const uploadContact: RequestHandler<{}, {}, {}> = async (
        * */
 
       for (let i = 0; i < contactObjs.length; i++) {
+        const foundTags = await TagModel.find({
+          _id: { $in: contactObjs[i].tagIds },
+        });
+
         const newContact = new ContactModel({
           firstName: contactObjs[i].name.name,
           lastName: contactObjs[i].name.surname,
@@ -122,13 +126,14 @@ export const uploadContact: RequestHandler<{}, {}, {}> = async (
           orgName: contactObjs[i].org || "",
           websiteUrl: contactObjs[i].url || "",
           notes: contactObjs[i].note || "",
-          tag: contactObjs[i]["x-tags"] || [], // either vcf has custom x-tags specified, no tags for by default
+          tags: foundTags,
+          customs: contactObjs[i].customs,
         });
-
-        const savedContact = await newContact.save();
-        savedContacts.push(savedContact);
+        savingContacts.push(newContact);
       }
     }
+
+    const savedContacts = await ContactModel.bulkSave(savingContacts);
 
     res.status(200).json({ uploadedContacts: savedContacts });
   } catch (error) {

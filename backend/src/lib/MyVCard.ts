@@ -34,13 +34,21 @@ type TRenamedVCard = {
     suffix?: string;
   };
   fullName: string;
-  [key: string]: any;
+  org: string;
+  url: string;
+  note: string;
+  tagIds: string[];
+  customs: { label: string; value: string }[];
 };
 
 export class MyVCard extends VCard {
   constructor() {
     super();
   }
+
+  // contact.vcf should have X-TAGID to upload contact that contain tags that exist in the system
+  static X_TAG_ID = "x-tagid";
+  static VCF_XTAG_ID = MyVCard.X_TAG_ID.toUpperCase();
 
   public parseToObject(string: string): TRenamedVCard[] {
     let rawVCardsArr: VCard[] = [];
@@ -49,7 +57,7 @@ export class MyVCard extends VCard {
     } catch (error) {
       console.error(error);
     }
-
+    // retry with version error fix
     if (!rawVCardsArr.length) {
       try {
         rawVCardsArr = VCard.parse(string.replace(/\r?\n/g, "\r\n"));
@@ -74,7 +82,7 @@ export class MyVCard extends VCard {
         const key = arr[0];
         let value = arr[arr.length - 1];
 
-        if (["email", "adr", "tel"].includes(key)) {
+        if (["email", "adr", "tel", MyVCard.X_TAG_ID].includes(key)) {
           return { ...obj, [key]: [...obj[key], value] };
         }
 
@@ -94,10 +102,19 @@ export class MyVCard extends VCard {
           suffix: "",
         },
         fullName: "",
+        org: "",
+        url: "",
+        note: "",
+        tagIds: [],
+        customs: [],
       };
 
       renamedObj.emails = vcardData.email;
       renamedObj.phones = vcardData.tel;
+      renamedObj.org = vcardData.org;
+      renamedObj.url = vcardData.url;
+      renamedObj.note = vcardData.note;
+
       renamedObj.adresses = vcardData.adr.map((address) => {
         return {
           line1: address[0] || "",
@@ -122,13 +139,16 @@ export class MyVCard extends VCard {
         }
       );
       renamedObj.fullName = vcardData.fn;
+      renamedObj.tagIds = vcardData[MyVCard.X_TAG_ID];
+
+      // custom fields
       const notIncludedKeys = Object.keys(vcardData).filter(
         (key) => !Object.keys(renamedObj).includes(key)
       );
       notIncludedKeys.forEach((key) => {
         // only accept strings
         if (typeof vcardData[key] === "string") {
-          renamedObj[key] = vcardData[key];
+          renamedObj.customs.push({ label: key, value: vcardData[key] });
         }
       });
 
@@ -148,7 +168,8 @@ export class MyVCard extends VCard {
       orgName,
       websiteUrl,
       notes,
-      // tags,
+      tags,
+      customs,
     } = obj;
     // name
     main += `N:${firstName};${lastName};;;\n`;
@@ -168,23 +189,20 @@ export class MyVCard extends VCard {
     });
     // org
     main += `ORG:${orgName}\n`;
-
     // website url
     main += `URL:${websiteUrl}\n`;
-
     // note
     main += `NOTE:${notes}\n`;
-
     // tags.
+    tags.forEach((tag) => {
+      main += `${MyVCard.VCF_XTAG_ID}:${tag._id}\n`;
+    });
+    // custom fields
+    customs.forEach((customF) => {
+      main += `${customF.label.toUpperCase()}:${customF.value}\n`;
+    });
 
-    // tags.forEach((tag) => {
-    //   main += `X-TAG:${tag}\n`;
-    // });
-
-    const fileContent = `BEGIN:VCARD
-    VERSION:4.0
-    ${main}
-    END:VCARD`;
+    const fileContent = `BEGIN:VCARD\nVERSION:4.0\n${main}END:VCARD`;
 
     const fileName = `${firstName}-${lastName}-${phones[0]}.vcf`;
     const writePath = `public/download/vcards/${fileName}`;
