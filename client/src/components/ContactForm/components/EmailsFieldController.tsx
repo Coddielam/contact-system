@@ -12,7 +12,7 @@ import { AiFillCloseCircle, AiOutlinePlus } from "react-icons/ai";
 import { TContactForm } from "../types/contactForm";
 import { emailRegex } from "../../../utils/regex";
 
-export default function PhonesFieldController({
+export default function EmailsFieldController({
   control,
   register,
   getValues,

@@ -12,8 +12,9 @@ import { useGetTag } from "../../utils/api/useGetTags";
 import { TContactReqBody } from "../../utils/api/types/contacts";
 import { AiOutlineLoading, AiOutlinePlus } from "react-icons/ai";
 import { TTag } from "../../utils/api/types/tags";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { phoneRegex } from "../../utils/regex";
 
 const emptyContact: TContact = {
   _id: "",
@@ -49,9 +50,11 @@ export default function ContactForm({
     getValues,
     setError,
     clearErrors,
+    trigger,
     watch,
     formState,
   } = useForm<TContactForm>({
+    mode: "onBlur",
     defaultValues: Object.assign(contact, {
       additionalPhones: [],
       additionalEmails: [],
@@ -133,6 +136,13 @@ export default function ContactForm({
         .concat(customFields.map(({ label, value }) => ({ label, value })))
         .filter((e) => e.label && e.value),
     };
+
+    const phonesValid = data.phones.every((p) => phoneRegex.test(p.toString()));
+    // FIX: weird phone validation error
+    if (!phonesValid) {
+      setError("phones", { message: "Please check format" });
+      return;
+    }
 
     await (contact._id ? patchContact : postContact)(requestBody);
     const successTimeout = setTimeout(() => {
@@ -236,7 +246,7 @@ export default function ContactForm({
             register={register}
             getValues={getValues}
             setValue={setValue}
-            defaultValue={getValues("phones")}
+            defaultValue={contact.phones}
             formState={formState}
             clearErrors={clearErrors}
           />

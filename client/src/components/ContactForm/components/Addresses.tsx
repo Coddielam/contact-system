@@ -102,7 +102,7 @@ export default function AddressesController({
     useState(0);
 
   return (
-    <div className="w-full">
+    <div className="w-3/4">
       <Controller
         name="addresses"
         control={control}

@@ -4,7 +4,7 @@ import { CustomError } from "../error";
 import { MyVCard } from "../lib/MyVCard";
 import { ContactModel, TagModel } from "../models";
 import { TContactReqBody } from "../types/contact";
-
+import _ from "lodash";
 import fs from "fs";
 
 export const findContact: RequestHandler<
@@ -93,6 +93,9 @@ export const uploadContact: RequestHandler<{}, {}, {}> = async (
     if (!req.files?.length) throw new CustomError("No uploaded files", 400);
 
     const savingContacts = [];
+    const updatedContacts = [];
+    const skippedContacts = [];
+
     for (let i = 0; i < req.files!.length; i++) {
       const fileInfo = (req.files as Express.Multer.File[])[i];
       const content = fs.readFileSync(fileInfo.path).toString();
@@ -102,20 +105,12 @@ export const uploadContact: RequestHandler<{}, {}, {}> = async (
         return Number(string.replace(/\D/g, ""));
       };
 
-      // TODO: implement add, skip, update business logic
-      /**
-       * How to determine if the contact exists?
-       * - skip: if the EXACT same contact exists in db
-       * - update: if name + phone found
-       * - add: if ! name + phone found
-       * */
-
       for (let i = 0; i < contactObjs.length; i++) {
-        const foundTags = await TagModel.find({
+        const systemTags = await TagModel.find({
           _id: { $in: contactObjs[i].tagIds },
         });
 
-        const newContact = new ContactModel({
+        const uploadedContact = {
           firstName: contactObjs[i].name.name,
           lastName: contactObjs[i].name.surname,
           phones: contactObjs[i].phones.map((phoneStr) =>
@@ -126,16 +121,85 @@ export const uploadContact: RequestHandler<{}, {}, {}> = async (
           orgName: contactObjs[i].org || "",
           websiteUrl: contactObjs[i].url || "",
           notes: contactObjs[i].note || "",
-          tags: foundTags,
+          tags: systemTags,
           customs: contactObjs[i].customs,
+        };
+        // check if there's one with the same name
+        const contactInDb = await ContactModel.findOne({
+          firstName: uploadedContact.firstName,
+          lastName: uploadedContact.lastName,
         });
-        savingContacts.push(newContact);
+
+        // check if exact same;
+        const isExactSame = !contactInDb
+          ? false
+          : JSON.stringify({
+              firstName: uploadedContact.firstName,
+              lastName: uploadedContact.lastName,
+              phones: _.sortBy(uploadedContact.phones),
+              addresses: _.sortBy(uploadedContact.addresses, ["line1"]),
+              emails: _.sortBy(uploadedContact.emails),
+            }) ===
+            JSON.stringify({
+              firstName: contactInDb.firstName,
+              lastName: contactInDb.lastName,
+              phones: _.sortBy(contactInDb.phones),
+              addresses: _.sortBy(
+                contactInDb.addresses.map(
+                  ({ line1, line2, line3, city, state, postal, country }) => ({
+                    line1,
+                    line2,
+                    line3,
+                    city,
+                    state,
+                    postal,
+                    country,
+                  })
+                ),
+                ["line1"]
+              ),
+              emails: _.sortBy(contactInDb.emails),
+            });
+
+        // check if the one in db shares a same number with the one being uploaded
+        let isUpdateSamePerson: boolean = false;
+        if (contactInDb) {
+          isUpdateSamePerson = contactInDb?.phones.find((p) =>
+            uploadedContact.phones.includes(p)
+          )
+            ? true
+            : false;
+        }
+
+        if (contactInDb && isUpdateSamePerson && !isExactSame) {
+          console.log("uodate:", contactInDb.firstName);
+          const updatedContact = await ContactModel.findByIdAndUpdate(
+            contactInDb._id,
+            uploadedContact
+          );
+          updatedContacts.push(updatedContact);
+          continue;
+        }
+
+        if (contactInDb && isExactSame) {
+          skippedContacts.push(contactInDb);
+          continue;
+        }
+
+        if (!contactInDb || (contactInDb && !isUpdateSamePerson)) {
+          const newContact = new ContactModel(uploadedContact);
+          savingContacts.push(newContact);
+        }
       }
     }
 
     const savedContacts = await ContactModel.bulkSave(savingContacts);
 
-    res.status(200).json({ uploadedContacts: savedContacts });
+    res.status(200).json({
+      savedContacts: savingContacts,
+      updatedContacts,
+      skippedContacts,
+    });
   } catch (error) {
     next(error);
   }
