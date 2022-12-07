@@ -45,7 +45,6 @@ export default function ContactCard({
 
     if (!downloadErr) {
       setShowTooltip(false);
-      window.location.reload();
     }
   };
 
