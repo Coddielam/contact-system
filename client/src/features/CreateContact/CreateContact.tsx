@@ -1,7 +1,12 @@
 import useModal from "../../hooks/useModal";
 import { ContactForm } from "../../components";
+import { TTag } from "../../utils/api/types/tags";
 
-export default function CreateContact() {
+export default function CreateContact({
+  existingTags,
+}: {
+  existingTags: TTag[];
+}) {
   const { showModal, setShowModal, Modal } = useModal();
 
   return (
@@ -19,7 +24,7 @@ export default function CreateContact() {
         }}
       >
         <ContactForm
-          existingTags={[]}
+          existingTags={existingTags}
           onSubmitSuccess={() => {
             window.location.reload();
           }}

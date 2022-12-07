@@ -22,6 +22,6 @@ export type TContactReqBody = {
   notes: string;
   tags: TTag[];
 } & {
-  // arbitrary field
-  [key: string]: any;
+  // custom fields
+  customs: { _id?: string; label: string; value: string }[];
 };

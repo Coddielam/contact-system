@@ -2,21 +2,21 @@ import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import type { TContact } from "../../types/contact";
 import { validateUrl } from "../../utils/validation";
 import cn from "classnames";
-
 import PhonesFieldController from "./components/PhonesFieldController";
 import EmailssFieldController from "./components/EmailsFieldController";
 import Addresses from "./components/Addresses";
-
 import { TContactForm } from "./types/contactForm";
 import { usePostContact } from "../../utils/api/useCreateContact";
 import { usePatchUpdateContact } from "../../utils/api/useUpdateContact";
 import { useGetTag } from "../../utils/api/useGetTags";
-
 import { TContactReqBody } from "../../utils/api/types/contacts";
-import { AiOutlineLoading } from "react-icons/ai";
+import { AiOutlineLoading, AiOutlinePlus } from "react-icons/ai";
 import { TTag } from "../../utils/api/types/tags";
+import { useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
-const emptyContact: Omit<TContact, "_id"> = {
+const emptyContact: TContact = {
+  _id: "",
   firstName: "",
   lastName: "",
   phones: [],
@@ -26,6 +26,10 @@ const emptyContact: Omit<TContact, "_id"> = {
   addresses: [],
   tags: [],
   notes: "",
+  customs: [],
+  additionalPhones: [],
+  additionalEmails: [],
+  additionalAddresses: [],
 };
 
 export default function ContactForm({
@@ -33,7 +37,7 @@ export default function ContactForm({
   existingTags,
   onSubmitSuccess,
 }: {
-  contact?: TContact | Omit<TContact, "_id">;
+  contact?: TContact | TContact;
   existingTags: TTag[];
   onSubmitSuccess: () => void;
 }) {
@@ -78,6 +82,10 @@ export default function ContactForm({
     refetch: fetchTags,
   } = useGetTag();
 
+  const [customFields, setCustomFields] = useState<
+    { id: string; label: string; value: string }[]
+  >([]);
+
   const onSubmit: SubmitHandler<TContact> = async (data) => {
     if (data.websiteUrl) {
       const valid = validateUrl(data.websiteUrl);
@@ -90,7 +98,9 @@ export default function ContactForm({
       }
     }
 
-    const concatedPhones = data.phones.concat(data.additionalPhones);
+    const concatedPhones = data.phones
+      .concat(data.additionalPhones)
+      .filter((e) => e);
     if (!concatedPhones.length) {
       setError("phones", {
         type: "custom",
@@ -108,8 +118,6 @@ export default function ContactForm({
       return;
     }
 
-    concatedPhones.map((phone) => Number(phone));
-
     const requestBody: TContactReqBody = {
       firstName: data.firstName,
       lastName: data.lastName,
@@ -120,6 +128,10 @@ export default function ContactForm({
       websiteUrl: data.websiteUrl,
       notes: data.notes,
       tags: data.tags,
+      customs: data.customs
+        .map(({ label, value }) => ({ label, value }))
+        .concat(customFields.map(({ label, value }) => ({ label, value })))
+        .filter((e) => e.label && e.value),
     };
 
     await (contact._id ? patchContact : postContact)(requestBody);
@@ -266,7 +278,7 @@ export default function ContactForm({
         </div>
 
         {/* Website URL */}
-        <div className="flex flex-col col-span-12">
+        <div className="flex flex-col col-span-6">
           <label>Website URL:</label>
           <input
             {...register("websiteUrl", {
@@ -278,15 +290,80 @@ export default function ContactForm({
           )}
         </div>
 
+        {/* Notes */}
         <div className="flex flex-col col-span-12">
           <label>Notes:</label>
           <textarea
             cols={20}
             rows={4}
             maxLength={200}
-            className="resize-none"
+            className="resize-none w-3/4"
             {...register("notes", { maxLength: 200 })}
           ></textarea>
+        </div>
+
+        {/* custom fields */}
+        <div className="flex flex-col col-span-12">
+          <label>Custom fields:</label>
+          {contact.customs.map((customF, index) => {
+            return (
+              <div className="mb-4" key={customF._id}>
+                <input
+                  type="text"
+                  className="mr-3"
+                  {...register(`customs.${index}.label`)}
+                />
+                <input type="text" {...register(`customs.${index}.value`)} />
+              </div>
+            );
+          })}
+          {customFields.map((customF) => {
+            return (
+              <div key={customF.id} className="mb-4">
+                <input
+                  type="text"
+                  className="mr-3"
+                  placeholder="Label"
+                  value={customF.label}
+                  onChange={(e) =>
+                    setCustomFields((state) =>
+                      state.map((field) =>
+                        field.id === customF.id
+                          ? { ...field, label: e.target.value }
+                          : field
+                      )
+                    )
+                  }
+                />
+                <input
+                  type="text"
+                  value={customF.value}
+                  placeholder="Value"
+                  onChange={(e) =>
+                    setCustomFields((state) =>
+                      state.map((field) =>
+                        field.id === customF.id
+                          ? { ...field, value: e.target.value }
+                          : field
+                      )
+                    )
+                  }
+                />
+              </div>
+            );
+          })}
+          <div
+            className="bg-slate-300 px-3 py-1 w-fit rounded-md shadow-sm text-xs"
+            role="button"
+            onClick={() =>
+              setCustomFields((state) => [
+                ...state,
+                { id: uuidv4(), label: "", value: "" },
+              ])
+            }
+          >
+            <AiOutlinePlus />
+          </div>
         </div>
 
         <div className="mt-5 bg-orange-400 px-3 py-2 flex justify-center w-24 h-[40px] items-center shadow-md rounded-md">

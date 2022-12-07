@@ -109,7 +109,7 @@ function App() {
               setSearchValue={setSearchValue}
             />
           }
-          topCenter={<CreateContact />}
+          topCenter={<CreateContact existingTags={tagsData?.tags || []} />}
           topRightSecond={<CreateTag />}
           topRightCorner={<Upload />}
           mainArea={

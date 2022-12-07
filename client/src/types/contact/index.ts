@@ -27,5 +27,9 @@ export type TContact = {
   tags: TTag[];
 } & {
   // arbitrary field
-  [key: string]: any;
+  customs: { _id: string; label: string; value: string }[];
+  // additional
+  additionalPhones: TPhones;
+  additionalEmails: TEmails;
+  additionalAddresses: TAddresses;
 };
