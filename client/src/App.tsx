@@ -9,10 +9,24 @@ import {
 import { useGetContacts } from "./utils/api/useGetContactCards";
 import { useGetTag } from "./utils/api/useGetTags";
 import { TTag } from "./utils/api/useUpdateTags";
+import { useMemo, useState } from "react";
+import { TContact } from "./types/contact";
 
-const SelectTag = ({ tags }: { tags: TTag[] }) => {
+const SelectTag = ({
+  tags,
+  selectedTagName,
+  setSelectedTagName,
+}: {
+  tags: TTag[];
+  selectedTagName: string;
+  setSelectedTagName: (tagName: string) => void;
+}) => {
   return (
-    <select className="px-2 py-1 min-w-[130px]">
+    <select
+      className="px-2 py-1 min-w-[130px]"
+      value={selectedTagName}
+      onChange={(e) => setSelectedTagName(e.target.value)}
+    >
       <option value="">- Select Tag -</option>
       {tags.map((tag: { _id: string; name: string }) => {
         return (
@@ -27,9 +41,48 @@ const SelectTag = ({ tags }: { tags: TTag[] }) => {
 
 function App() {
   const { data: tagsData, loading: tagsLoading, err: tagsErr } = useGetTag();
-  const { data, loading, err } = useGetContacts();
+  const { data: contacts, loading, err } = useGetContacts();
+  const [selectedTagName, setSelectedTagName] = useState("");
+  const [searchValue, setSearchValue] = useState("");
 
-  if (loading || !data) return <p>Loading ...</p>;
+  const searchableContacts = useMemo(() => {
+    if (!contacts) return [];
+    return contacts.map((contact) => {
+      return {
+        _id: contact._id,
+        searchStr: `${contact.firstName} ${
+          contact.lastName
+        } ${contact.phones.join(" ")} ${contact.emails.join(" ")} ${contact.tags
+          .map((tag) => tag.name)
+          .join(" ")} ${contact.websiteUrl}${contact.notes}`.toLowerCase(),
+      };
+    });
+  }, [contacts]);
+
+  const filteredContacts = useMemo(() => {
+    if (!contacts) return [];
+    // filter based on tags
+    let returnContacts: TContact[] = contacts;
+    if (selectedTagName) {
+      returnContacts = returnContacts.filter((contact) => {
+        return contact.tags.find((tag) => tag.name === selectedTagName);
+      });
+    }
+    if (searchValue) {
+      const matchSearchContactIds = searchableContacts.reduce<string[]>(
+        (ids, contact) =>
+          contact.searchStr.includes(searchValue) ? [...ids, contact._id] : ids,
+        []
+      );
+
+      returnContacts = returnContacts.filter((contact) =>
+        matchSearchContactIds.includes(contact._id)
+      );
+    }
+    return returnContacts;
+  }, [contacts, selectedTagName, searchableContacts, searchValue]);
+
+  if (loading || !contacts) return <p>Loading ...</p>;
 
   if (err) return <p>Error!</p>;
 
@@ -37,15 +90,24 @@ function App() {
     <div className="bg-appbackground w-screen h-screen">
       <div className="max-w-screen-lg mx-auto py-4">
         <DashboardLayout
-          topLeftCorner={<SearchContacts />}
-          topLeftSecond={
-            tagsLoading ? (
+          topLeftCorner={
+            tagsLoading || !tagsData ? (
               <>Loading ...</>
             ) : tagsErr ? (
               <>x_x</>
             ) : (
-              <SelectTag tags={tagsData!.tags} />
+              <SelectTag
+                tags={tagsData.tags}
+                selectedTagName={selectedTagName}
+                setSelectedTagName={setSelectedTagName}
+              />
             )
+          }
+          topLeftSecond={
+            <SearchContacts
+              value={searchValue}
+              setSearchValue={setSearchValue}
+            />
           }
           topCenter={<CreateContact />}
           topRightSecond={<CreateTag />}
@@ -53,7 +115,7 @@ function App() {
           mainArea={
             tagsData ? (
               <ContactCards
-                contacts={data.contacts}
+                contacts={filteredContacts}
                 existingTags={tagsData.tags}
               />
             ) : (

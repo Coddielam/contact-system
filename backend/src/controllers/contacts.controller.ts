@@ -145,7 +145,6 @@ export const downloadContact: RequestHandler<{ id: string }, {}, {}> = async (
     const contact = await ContactModel.findById(req.params.id);
     if (!contact) throw new CustomError("Contact not found", 400);
     const filePath = await new MyVCard().createVCFFromDbObj(contact);
-    console.log("file path:", filePath);
     res.download(filePath);
   } catch (error) {
     next(error);

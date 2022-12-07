@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { TContact } from "../../types/contact";
 import { myAxios } from "./myAxios";
 
 const getContacts = async () => {
@@ -7,7 +8,7 @@ const getContacts = async () => {
 };
 
 export function useGetContacts() {
-  const [data, setData] = useState<any>();
+  const [data, setData] = useState<TContact[]>();
   const [err, setErr] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -16,7 +17,7 @@ export function useGetContacts() {
     try {
       const res = await getContacts();
       console.log(res);
-      setData(res.data);
+      setData(res.data.contacts);
     } catch (error) {
       setErr(err);
     }
