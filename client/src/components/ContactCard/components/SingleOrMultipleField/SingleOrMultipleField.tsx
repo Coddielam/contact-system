@@ -7,7 +7,7 @@ const SingleOrMultiple = ({
 }) => {
   if (data.length > 1) {
     return (
-      <p>
+      <p className="whitespace-nowrap overflow-hidden text-ellipsis">
         {prefix} {data[0]} <span>+{data.length - 1}</span>{" "}
       </p>
     );

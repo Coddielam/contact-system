@@ -13,7 +13,7 @@ import { TTag } from "./utils/api/useUpdateTags";
 const SelectTag = ({ tags }: { tags: TTag[] }) => {
   return (
     <select className="px-2 py-1 min-w-[130px]">
-      <option value="">--</option>
+      <option value="">- Select Tag -</option>
       {tags.map((tag: { _id: string; name: string }) => {
         return (
           <option key={tag._id} value={tag.name}>

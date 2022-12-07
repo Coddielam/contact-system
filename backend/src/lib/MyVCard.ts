@@ -187,13 +187,10 @@ export class MyVCard extends VCard {
     END:VCARD`;
 
     const fileName = `${firstName}-${lastName}-${phones[0]}.vcf`;
-    const filePath = path.join(__dirname, `../public/vCards/${fileName}`);
+    const writePath = `public/download/vcards/${fileName}`;
     try {
-      await fs.promises.appendFile(
-        path.join(__dirname, `../public/vCards/${fileName}`),
-        fileContent
-      );
-      return filePath;
+      await fs.promises.writeFile(path.join(writePath), fileContent);
+      return writePath;
     } catch (error) {
       throw error;
     }

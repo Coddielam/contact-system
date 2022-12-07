@@ -57,17 +57,9 @@ export const updateContact: RequestHandler<
   TContactReqBody
 > = async (req, res, next) => {
   try {
-    const { tags, ...otherFields } = req.body;
-    const update = tags?.length
-      ? {
-          ...otherFields,
-          $push: { tags: { $each: tags } },
-        }
-      : req.body;
-
     const updatedContact = await ContactModel.findByIdAndUpdate(
       req.params.id,
-      update
+      req.body
     );
 
     if (!updatedContact) throw new Error("Contact does not exist");
@@ -144,16 +136,17 @@ export const uploadContact: RequestHandler<{}, {}, {}> = async (
   }
 };
 
-export const downloadContact: RequestHandler<
-  {},
-  {},
-  { contactId: string }
-> = async (req, res, next) => {
+export const downloadContact: RequestHandler<{ id: string }, {}, {}> = async (
+  req,
+  res,
+  next
+) => {
   try {
-    const contact = await ContactModel.findById(req.body.contactId);
+    const contact = await ContactModel.findById(req.params.id);
     if (!contact) throw new CustomError("Contact not found", 400);
     const filePath = await new MyVCard().createVCFFromDbObj(contact);
-    res.status(200).sendFile(filePath);
+    console.log("file path:", filePath);
+    res.download(filePath);
   } catch (error) {
     next(error);
   }

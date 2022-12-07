@@ -3,6 +3,7 @@ import { TTag } from "../../utils/api/types/tags";
 export type TPhones = number[];
 export type TEmails = string[];
 export type TAddress = {
+  _id: string;
   line1: string;
   line2: string;
   line3: string;

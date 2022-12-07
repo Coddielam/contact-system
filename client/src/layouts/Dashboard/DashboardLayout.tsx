@@ -18,11 +18,11 @@ export default function DashboardLayout({
   return (
     <div className="flex flex-col gap-7">
       <div className="grid grid-cols-10 w-full sticky top-0 bg-appbackground  bg-opacity-80 shadow-appbackground shadow-md py-3 justify-items-end items-center">
-        <div className="col-span-2 text-left">{topLeftCorner}</div>
-        <div className="col-span-2 text-left">{topLeftSecond}</div>
-        <div className="col-span-2 text-left">{topCenter}</div>
-        <div className="col-span-2 text-right">{topRightSecond}</div>
-        <div className="col-span-2 text-right">{topRightCorner}</div>
+        <div className="col-span-2">{topLeftCorner}</div>
+        <div className="col-span-2">{topLeftSecond}</div>
+        <div className="col-span-2">{topCenter}</div>
+        <div className="col-span-2 ">{topRightSecond}</div>
+        <div className="col-span-2 ">{topRightCorner}</div>
       </div>
       <div>{mainArea}</div>
     </div>

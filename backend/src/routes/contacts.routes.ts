@@ -46,7 +46,7 @@ export default function (app: Express) {
   const upload = multer({ storage });
   contactsRouter.post("/upload", upload.array("contacts", 5), uploadContact);
   // download one or more contacts
-  contactsRouter.get("/download", downloadContact);
+  contactsRouter.get("/download/:id", downloadContact);
 
   app.use("/api/contacts", contactsRouter);
 }

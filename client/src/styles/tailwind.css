@@ -24,4 +24,7 @@
   input[type="submit"] {
     @apply cursor-pointer;
   }
+  * {
+    @apply !select-none;
+  }
 }
