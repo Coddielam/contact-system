@@ -2,6 +2,18 @@
 version: "3.1"
 
 services:
+  express:
+    build: .
+    depends_on:
+      - mongo
+      - mongo-express
+    ports:
+      - "4000:4000"
+    environment:
+      - HOST=mongo
+    networks:
+      - contact-sys-network
+
   mongo:
     image: mongo
     restart: always
@@ -10,6 +22,8 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
+    networks:
+      - contact-sys-network
 
   mongo-express:
     image: mongo-express
@@ -20,3 +34,10 @@ services:
       ME_CONFIG_MONGODB_ADMINUSERNAME: root
       ME_CONFIG_MONGODB_ADMINPASSWORD: example
       ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
+    networks:
+      - contact-sys-network
+
+networks:
+  contact-sys-network:
+    external:
+      name: contact-sys-network
