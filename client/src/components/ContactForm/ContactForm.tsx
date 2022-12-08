@@ -67,7 +67,7 @@ export default function ContactForm({
   const {
     data,
     loading: postContactLoading,
-    err,
+    err: createContactErr,
     refetch: postContact,
   } = usePostContact();
 
@@ -137,14 +137,11 @@ export default function ContactForm({
         .filter((e) => e.label && e.value),
     };
 
-    const phonesValid = data.phones.every((p) => phoneRegex.test(p.toString()));
-    // FIX: weird phone validation error
-    if (!phonesValid) {
-      setError("phones", { message: "Please check format" });
+    await (contact._id ? patchContact : postContact)(requestBody);
+    if (createContactErr || patchContactErr) {
+      console.log(contact._id ? patchContactData : createContactErr);
       return;
     }
-
-    await (contact._id ? patchContact : postContact)(requestBody);
     const successTimeout = setTimeout(() => {
       onSubmitSuccess();
       clearTimeout(successTimeout);

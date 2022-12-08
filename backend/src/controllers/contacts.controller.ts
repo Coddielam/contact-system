@@ -7,7 +7,7 @@ import { TContactReqBody } from "../types/contact";
 import _ from "lodash";
 import fs from "fs";
 import { TContact } from "../models/contact.model";
-import { stringify } from "querystring";
+import { ValidateContact } from "../services/ValidateContact";
 
 export const findContact: RequestHandler<
   { id: string },
@@ -25,8 +25,8 @@ export const findContact: RequestHandler<
 
 export const findAllContacts: RequestHandler<
   {},
-  { contacts: Document[] },
-  {}
+  {},
+  { contacts: Document[] }
 > = async (req, res, next) => {
   try {
     const contacts = await ContactModel.find().populate("tags");
@@ -42,8 +42,6 @@ export const createContact: RequestHandler<
   TContactReqBody
 > = async (req, res, next) => {
   try {
-    // TODO: validate request body
-
     // validate
     const newContact = new ContactModel(req.body);
     const contact = await newContact.save();

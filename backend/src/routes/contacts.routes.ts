@@ -11,6 +11,7 @@ import {
 import checkParamId from "../middlewares/checkParamId";
 import multer from "multer";
 import path from "path";
+import validateContact from "../middlewares/validateContact";
 
 export default function (app: Express) {
   const contactsRouter = express.Router();
@@ -19,7 +20,7 @@ export default function (app: Express) {
   contactsRouter.get("/all", findAllContacts);
 
   // create a contact
-  contactsRouter.post("/create", createContact);
+  contactsRouter.post("/create", validateContact, createContact);
 
   // get a specific contact
   contactsRouter.get("/:id", checkParamId, findContact);
@@ -28,7 +29,7 @@ export default function (app: Express) {
   contactsRouter.patch(
     "/:id/update",
     checkParamId,
-    // accept max of 5 vcards per requests
+    validateContact,
     updateContact
   );
   // delete one or more contacts
