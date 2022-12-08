@@ -1,17 +1,22 @@
 import { FormEventHandler, useState } from "react";
 import { useModal } from "../../hooks";
+import useReload from "../../hooks/useRefresh";
 import { usePostContactUpload } from "../../utils/api/useUploadContacts";
 
 export default function Upload() {
   const { data, loading, err, refetch } = usePostContactUpload();
   const { showModal, setShowModal, Modal } = useModal();
+  const { toaster } = useReload();
 
   const onSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     await refetch(formData);
-    if (!err && data) setShowModal(false);
-    window.location.reload();
+    if (!err && data) {
+      return;
+    }
+    setShowModal(false);
+    toaster.toast("Contacts uploaded!");
   };
 
   return (

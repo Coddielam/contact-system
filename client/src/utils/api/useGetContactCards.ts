@@ -16,7 +16,6 @@ export function useGetContacts() {
     setLoading(true);
     try {
       const res = await getContacts();
-      console.log(res);
       setData(res.data.contacts);
     } catch (error) {
       setErr(err);

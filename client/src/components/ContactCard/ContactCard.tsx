@@ -6,6 +6,7 @@ import { useState } from "react";
 import cn from "classnames";
 import { useDownloadContact } from "../../utils/api/useDownloadContact";
 import { useDeleteContact } from "../../utils/api/useDeleteContact";
+import { useRefresh } from "../../hooks";
 
 export default function ContactCard({
   contact: {
@@ -26,9 +27,9 @@ export default function ContactCard({
   onClick: () => void;
 }) {
   const [showTooltip, setShowTooltip] = useState(false);
-
   const { refetch: download, err: downloadErr } = useDownloadContact();
   const { refetch: deleteContact, err: deleteErr } = useDeleteContact();
+  const { toaster } = useRefresh();
 
   const onDownload = async () => {
     const blob = await download(_id);
@@ -38,7 +39,6 @@ export default function ContactCard({
     const url = window.URL.createObjectURL(blob);
     a.href = url;
     a.download = firstName + lastName + ".vcf";
-    console.log(a);
     a.click();
     window.URL.revokeObjectURL(url);
     a.remove();
@@ -52,7 +52,7 @@ export default function ContactCard({
     await deleteContact(_id);
     if (!deleteErr) {
       setShowTooltip(false);
-      window.location.reload();
+      toaster.toast("Contact Deleted");
     }
   };
 

@@ -1,6 +1,7 @@
 import Upload from "./features/Upload/Upoad";
 import DashboardLayout from "./layouts/Dashboard/DashboardLayout";
 import {
+  SelectTag,
   ContactCards,
   CreateContact,
   CreateTag,
@@ -8,38 +9,12 @@ import {
 } from "./features";
 import { useGetContacts } from "./utils/api/useGetContactCards";
 import { useGetTag } from "./utils/api/useGetTags";
-import { TTag } from "./utils/api/useUpdateTags";
 import { useMemo, useState } from "react";
 import { TContact } from "./types/contact";
 import { AiOutlineLoading } from "react-icons/ai";
 import { TbRobotOff } from "react-icons/tb";
-
-const SelectTag = ({
-  tags,
-  selectedTagName,
-  setSelectedTagName,
-}: {
-  tags: TTag[];
-  selectedTagName: string;
-  setSelectedTagName: (tagName: string) => void;
-}) => {
-  return (
-    <select
-      className="px-2 py-1 min-w-[130px]"
-      value={selectedTagName}
-      onChange={(e) => setSelectedTagName(e.target.value)}
-    >
-      <option value="">- Select Tag -</option>
-      {tags.map((tag: { _id: string; name: string }) => {
-        return (
-          <option key={tag._id} value={tag.name}>
-            {tag.name}
-          </option>
-        );
-      })}
-    </select>
-  );
-};
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   const { data: tagsData, loading: tagsLoading, err: tagsErr } = useGetTag();
@@ -85,45 +60,48 @@ function App() {
   }, [contacts, selectedTagName, searchableContacts, searchValue]);
 
   return (
-    <div className="bg-appbackground w-screen h-screen overflow-scroll">
-      <div className="max-w-screen-lg mx-auto py-4">
-        {err && (
-          <div className="flex flex-col items-center">
-            <TbRobotOff className="w-48 h-48 block" />
-            <p className="text-4xl font-light">Something went wrong!</p>
-          </div>
-        )}
-        {(loading || !contacts) && (
-          <AiOutlineLoading className="h-28 w-28 animate-spin fill-slate-500" />
-        )}
-        {contacts && tagsData && (
-          <DashboardLayout
-            topLeftCorner={
-              <SelectTag
-                tags={tagsData.tags}
-                selectedTagName={selectedTagName}
-                setSelectedTagName={setSelectedTagName}
-              />
-            }
-            topLeftSecond={
-              <SearchContacts
-                value={searchValue}
-                setSearchValue={setSearchValue}
-              />
-            }
-            topCenter={<CreateContact existingTags={tagsData.tags || []} />}
-            topRightSecond={<CreateTag />}
-            topRightCorner={<Upload />}
-            mainArea={
-              <ContactCards
-                contacts={filteredContacts}
-                existingTags={tagsData.tags}
-              />
-            }
-          />
-        )}
+    <>
+      <ToastContainer />
+      <div className="bg-appbackground w-screen h-screen overflow-scroll">
+        <div className="max-w-screen-lg mx-auto py-4">
+          {err && (
+            <div className="flex flex-col items-center">
+              <TbRobotOff className="w-48 h-48 block" />
+              <p className="text-4xl font-light">Something went wrong!</p>
+            </div>
+          )}
+          {(loading || !contacts) && (
+            <AiOutlineLoading className="h-28 w-28 animate-spin fill-slate-500" />
+          )}
+          {contacts && tagsData && (
+            <DashboardLayout
+              topLeftCorner={
+                <SelectTag
+                  tags={tagsData.tags}
+                  selectedTagName={selectedTagName}
+                  setSelectedTagName={setSelectedTagName}
+                />
+              }
+              topLeftSecond={
+                <SearchContacts
+                  value={searchValue}
+                  setSearchValue={setSearchValue}
+                />
+              }
+              topCenter={<CreateContact existingTags={tagsData.tags || []} />}
+              topRightSecond={<CreateTag />}
+              topRightCorner={<Upload />}
+              mainArea={
+                <ContactCards
+                  contacts={filteredContacts}
+                  existingTags={tagsData.tags}
+                />
+              }
+            />
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

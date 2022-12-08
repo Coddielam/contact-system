@@ -16,7 +16,6 @@ export function useGetTag() {
     setLoading(true);
     try {
       const res = await getTags();
-      console.log(res);
       setData(res.data);
     } catch (error) {
       setErr(err);

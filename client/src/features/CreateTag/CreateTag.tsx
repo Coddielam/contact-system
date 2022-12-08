@@ -1,5 +1,5 @@
 import { FormEventHandler, useState } from "react";
-import { useModal } from "../../hooks";
+import { useModal, useRefresh } from "../../hooks";
 import { useCreateTag } from "../../utils/api/useCreateTag";
 import { useGetTag } from "../../utils/api/useGetTags";
 import cn from "classnames";
@@ -15,9 +15,11 @@ export default function Upload() {
     "CREATE"
   );
   const { data: tagsData, loading, err, refetch } = useGetTag();
+  const { toaster } = useRefresh();
   // handle create
   const { refetch: postTag, err: createTagErr } = useCreateTag();
   const [isCreateInvalid, setIsCreateInvalid] = useState(false);
+
   const onCreateTag: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     setIsCreateInvalid(false);
@@ -29,7 +31,7 @@ export default function Upload() {
       await postTag({ tag: formData.get("tag") as string });
       if (!createTagErr) {
         setShowModal(false);
-        window.location.reload();
+        toaster.toast("Tag has been created!");
       }
     } catch (error) {
       console.error(err);
@@ -49,13 +51,10 @@ export default function Upload() {
     for (const [key, value] of formData.entries()) {
       reqBody.tags.push({ _id: key, name: value as string });
     }
-    try {
-      await patchTags(reqBody);
-      !updateTagsError && setShowModal(false);
-      window.location.reload();
-    } catch (error) {
-      console.error(error);
-    }
+    await patchTags(reqBody);
+    !updateTagsError && setShowModal(false);
+    setShowModal(false);
+    toaster.toast("Tag has been updated!");
   };
 
   // handle delete
@@ -68,7 +67,7 @@ export default function Upload() {
     await deleteTags(reqData);
     if (deleteTagsErr) return;
     setShowModal(false);
-    window.location.reload();
+    toaster.toast("Tag has been deleted!");
   };
 
   if (!tagsData) return <>Loading ...</>;

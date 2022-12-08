@@ -1,5 +1,5 @@
 import type { TContact } from "../../types/contact";
-import { useModal } from "../../hooks";
+import { useModal, useRefresh } from "../../hooks";
 import { ContactForm, ContactCard } from "../../components";
 import { useState } from "react";
 import { TTag } from "../../utils/api/types/tags";
@@ -12,7 +12,6 @@ export default function ContactCards({
   existingTags: TTag[];
 }) {
   const { showModal, setShowModal, Modal } = useModal();
-
   const [contact, setContact] = useState<TContact>();
 
   return (
@@ -37,7 +36,7 @@ export default function ContactCards({
             contact={contact}
             existingTags={existingTags}
             onSubmitSuccess={() => {
-              window.location.reload();
+              setShowModal(false);
             }}
           />
         </Modal>

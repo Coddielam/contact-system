@@ -15,6 +15,7 @@ import { TTag } from "../../utils/api/types/tags";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { phoneRegex } from "../../utils/regex";
+import { useRefresh } from "../../hooks";
 
 const emptyContact: TContact = {
   _id: "",
@@ -89,6 +90,8 @@ export default function ContactForm({
     { id: string; label: string; value: string }[]
   >([]);
 
+  const { toaster } = useRefresh();
+
   const onSubmit: SubmitHandler<TContact> = async (data) => {
     if (data.websiteUrl) {
       const valid = validateUrl(data.websiteUrl);
@@ -138,14 +141,8 @@ export default function ContactForm({
     };
 
     await (contact._id ? patchContact : postContact)(requestBody);
-    if (createContactErr || patchContactErr) {
-      console.log(contact._id ? patchContactData : createContactErr);
-      return;
-    }
-    const successTimeout = setTimeout(() => {
-      onSubmitSuccess();
-      clearTimeout(successTimeout);
-    }, 500);
+    toaster.toast(contact._id ? "Update successful" : "Create successful");
+    onSubmitSuccess();
   };
 
   return (
