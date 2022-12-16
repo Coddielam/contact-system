@@ -14,7 +14,7 @@ export default function Upload() {
   const [action, setAction] = useState<"CREATE" | "UPDATE" | "DELETE">(
     "CREATE"
   );
-  const { data: tagsData, loading, err, refetch } = useGetTag();
+  const { data: tagsData, loading, err, refetch } = useGetTag(!showModal);
   const { toaster } = useRefresh();
   // handle create
   const { refetch: postTag, err: createTagErr } = useCreateTag();
@@ -70,8 +70,6 @@ export default function Upload() {
     toaster.toast("Tag has been deleted!");
   };
 
-  if (!tagsData) return <>Loading ...</>;
-
   return (
     <>
       <button
@@ -110,113 +108,125 @@ export default function Upload() {
             </button>
           </div>
           {/* CREATE VIEW */}
-          {action === "CREATE" && (
-            <div className="mt-5 border-t-2 border-slate-300 pt-5">
-              <form className="w-full" onSubmit={onCreateTag}>
-                <p className="mb-4">
-                  Existing tags:{" "}
-                  {tagsData.tags.reduce(
-                    (
-                      string: string,
-                      tag: { _id: string; name: string },
-                      index: number
-                    ) => string + (index > 0 ? ", " : "") + tag.name,
-                    ""
-                  )}
-                </p>
-                <input
-                  type="text"
-                  placeholder="Tag name"
-                  name="tag"
-                  className="w-1/2"
-                />
-                <input
-                  type="submit"
-                  value="Create"
-                  className={cn("ml-4 py-1 px-3 bg-blue-400 rounded-md")}
-                />
-                {isCreateInvalid && (
-                  <p className="text-error">Tag name is required</p>
-                )}
-              </form>
-            </div>
-          )}
-          {/* UPDATE VIEW */}
-          {action === "UPDATE" && (
-            <div className="mt-5 border-t-2 border-slate-300 pt-5">
-              {!tagsData.tags.length && (
-                <p className="text-slate-300">No Tags</p>
-              )}
-
-              {!tagsData.tags.length ? (
-                <></>
-              ) : (
-                <form
-                  onSubmit={onUpdateTags}
-                  className="flex flex-col gap-3 items-start"
-                >
-                  {tagsData.tags.map((tag: { _id: string; name: string }) => {
-                    return (
-                      <input
-                        key={tag._id}
-                        name={tag._id}
-                        type="text"
-                        defaultValue={tag.name}
-                      />
-                    );
-                  })}
+          {!tagsData ? (
+            <p>Loading...</p>
+          ) : (
+            action === "CREATE" && (
+              <div className="mt-5 border-t-2 border-slate-300 pt-5">
+                <form className="w-full" onSubmit={onCreateTag}>
+                  <p className="mb-4">
+                    Existing tags:{" "}
+                    {tagsData.tags.reduce(
+                      (
+                        string: string,
+                        tag: { _id: string; name: string },
+                        index: number
+                      ) => string + (index > 0 ? ", " : "") + tag.name,
+                      ""
+                    )}
+                  </p>
+                  <input
+                    type="text"
+                    placeholder="Tag name"
+                    name="tag"
+                    className="w-1/2"
+                  />
                   <input
                     type="submit"
-                    value="Update"
-                    className={cn("py-1 px-3 bg-blue-400 rounded-md")}
+                    value="Create"
+                    className={cn("ml-4 py-1 px-3 bg-blue-400 rounded-md")}
                   />
-                  {updateTagsError && (
-                    <p className="text-error">Server error</p>
+                  {isCreateInvalid && (
+                    <p className="text-error">Tag name is required</p>
                   )}
                 </form>
-              )}
-            </div>
+              </div>
+            )
           )}
-          {/* DELETE VIEW */}
-          {action === "DELETE" && (
-            <div className="mt-5 border-t-2 border-slate-300 pt-5">
-              {!tagsData.tags.length && (
-                <p className="text-slate-300">No Tags</p>
-              )}
+          {/* UPDATE VIEW */}
+          {!tagsData ? (
+            <p>Loading...</p>
+          ) : (
+            action === "UPDATE" && (
+              <div className="mt-5 border-t-2 border-slate-300 pt-5">
+                {!tagsData.tags.length && (
+                  <p className="text-slate-300">No Tags</p>
+                )}
 
-              {!tagsData.tags.length ? (
-                <></>
-              ) : (
-                <form
-                  onSubmit={onDeleteTags}
-                  className="flex gap-3 flex-wrap items-center"
-                >
-                  {tagsData.tags.map((tag: { _id: string; name: string }) => {
-                    return (
-                      <>
-                        <label className="mt-0" htmlFor={tag._id}>
-                          {tag.name}
-                        </label>
+                {!tagsData.tags.length ? (
+                  <></>
+                ) : (
+                  <form
+                    onSubmit={onUpdateTags}
+                    className="flex flex-col gap-3 items-start"
+                  >
+                    {tagsData.tags.map((tag: { _id: string; name: string }) => {
+                      return (
                         <input
                           key={tag._id}
-                          id={tag._id}
-                          type="checkbox"
-                          name="tagId"
-                          value={tag._id}
+                          name={tag._id}
+                          type="text"
+                          defaultValue={tag.name}
                         />
-                      </>
-                    );
-                  })}
-                  <div className="w-full">
+                      );
+                    })}
                     <input
                       type="submit"
-                      value="Delete"
-                      className="bg-red-500 text-slate-100 px-4 py-1 rounded-md shadow-md"
+                      value="Update"
+                      className={cn("py-1 px-3 bg-blue-400 rounded-md")}
                     />
-                  </div>
-                </form>
-              )}
-            </div>
+                    {updateTagsError && (
+                      <p className="text-error">Server error</p>
+                    )}
+                  </form>
+                )}
+              </div>
+            )
+          )}
+          {/* DELETE VIEW */}
+          {!tagsData ? (
+            <p>Loading ...</p>
+          ) : (
+            action === "DELETE" && (
+              <div className="mt-5 border-t-2 border-slate-300 pt-5">
+                {!tagsData.tags.length && (
+                  <p className="text-slate-300">No Tags</p>
+                )}
+
+                {!tagsData.tags.length ? (
+                  <></>
+                ) : (
+                  <form
+                    onSubmit={onDeleteTags}
+                    className="flex gap-3 flex-wrap items-center"
+                  >
+                    {tagsData.tags.map((tag: { _id: string; name: string }) => {
+                      return (
+                        <>
+                          <label className="mt-0" htmlFor={tag._id}>
+                            {tag.name}
+                          </label>
+                          <input
+                            key={tag._id}
+                            id={tag._id}
+                            type="checkbox"
+                            name="tagId"
+                            value={tag._id}
+                          />
+                        </>
+                      );
+                    })}
+                    <div className="w-full">
+                      <input
+                        type="submit"
+                        value="Delete"
+                        className="bg-red-500 text-slate-100 px-4 py-1 rounded-md shadow-md"
+                      />
+                    </div>
+                  </form>
+                )}
+              </div>
+            )
           )}
         </div>
       </Modal>

@@ -1,3 +1,4 @@
+import React from "react";
 import type { TContact } from "../../types/contact";
 import { getFullName } from "../../utils/formatContact";
 import SingleOrMultipleField from "./components/SingleOrMultipleField/SingleOrMultipleField";
@@ -8,7 +9,7 @@ import { useDownloadContact } from "../../utils/api/useDownloadContact";
 import { useDeleteContact } from "../../utils/api/useDeleteContact";
 import { useRefresh } from "../../hooks";
 
-export default function ContactCard({
+function ContactCard({
   contact: {
     _id,
     firstName,
@@ -119,3 +120,5 @@ export default function ContactCard({
     </div>
   );
 }
+
+export default React.memo(ContactCard);

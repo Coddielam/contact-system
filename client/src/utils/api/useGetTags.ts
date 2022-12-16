@@ -7,7 +7,7 @@ const getTags = async () => {
   return res;
 };
 
-export function useGetTag() {
+export function useGetTag(noAutoFetch = false) {
   const [data, setData] = useState<{ tags: TTag[] }>();
   const [err, setErr] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -24,8 +24,10 @@ export function useGetTag() {
   };
 
   useEffect(() => {
-    fetch();
-  }, []);
+    if (!noAutoFetch) {
+      fetch();
+    }
+  }, [noAutoFetch]);
 
   return { data, loading, err, refetch: fetch };
 }
